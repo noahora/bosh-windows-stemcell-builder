@@ -50,13 +50,22 @@ end
 
 class AWSPackerJsonTemplate < Template
   def initialize(template, regions, aws_access_key, aws_secret_key,
-                 ami_name, agent_url)
+                 ami_name, agent_url, setup_winrm)
     super(template)
     @regions = regions
     @aws_access_key = aws_access_key
     @aws_secret_key = aws_secret_key
     @ami_name = ami_name
     @agent_url = agent_url
+    @setup_winrm = setup_winrm
+  end
+end
+
+class AWSSetupWinRMTemplate < Template
+  def initialize(template, cert, password)
+    super(template)
+    @cert = cert
+    @password = password
   end
 end
 

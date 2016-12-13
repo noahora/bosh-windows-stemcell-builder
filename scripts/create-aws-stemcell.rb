@@ -78,9 +78,31 @@ aws_config = File.join(BUILDER_PATH, "aws")
 
 FileUtils.mv(BOSH_AGENT_DEPS_PATH, File.join(aws_config, "agent-dependencies.zip"))
 
+setup_winrm = Tempfile.new(['setup_winrm','.txt']).tap(&:close).path
+
+
+File.write('/tmp/myconfig.cnf') do
+  <<-EOF
+[req]
+distinguished_name = req_distinguished_name
+prompt = no
+[req_distinguished_name]
+CN = packer
+[x509_ext]
+basicConstraints = critical, CA:true
+keyUsage = critical,digitalSignature,cRLSign,keyCertSign
+extendedKeyUsage = serverAuth,clientAuth
+EOF
+end
+
+`openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -config /tmp/myconfig.cnf -extensions x509_ext`
+`openssl pkcs12 -export -inkey key.pem -in cert.pem -out file.p12 -name "My Certificate" -passout pass:`
+cert = cat that file
+AWSSetupWinRMTemplate.new(setup_winrm, cert, password)
 AWSPackerJsonTemplate.new("#{BUILDER_PATH}/erb_templates/aws/packer.json.erb",
                           STEMCELL_REGIONS, AWS_ACCESS_KEY, AWS_SECRET_KEY,
-                          AMI_NAME, AGENT_URL).save(aws_config)
+                          AMI_NAME, AGENT_URL, setup_winrm).save(aws_config)
+abort("foo")
 
 amis = run_packer(File.join(aws_config, "packer.json"))
 

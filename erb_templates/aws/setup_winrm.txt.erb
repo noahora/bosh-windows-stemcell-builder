@@ -1,0 +1,30 @@
+<powershell>
+Remove-Item -Path WSMan:\Localhost\listener\listener* -Recurse
+
+$certContents = @"
+<%= @cert %>
+"@
+$tmp = New-TemporaryFile
+Set-Content $certContents $tmp.FullName
+Import-PfxCertificate -FilePath foo -CertStoreLocation Cert:\LocalMachine\My
+
+$Cert = Get-ChildItem Cert:\LocalMachine\My -DnsName "packer"
+New-Item -Path WSMan:\LocalHost\Listener -Transport HTTPS -Address * -CertificateThumbPrint $Cert.Thumbprint -Force
+
+winrm quickconfig -q
+winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="300"}'
+winrm set winrm/config '@{MaxTimeoutms="1800000"}'
+# winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+# winrm set winrm/config/client '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service/auth '@{Basic="true"}'
+# winrm set winrm/config/client/auth '@{Basic="true"}'
+winrm set winrm/config/listener?Address=*+Transport=HTTPS "@{Port=`"5986`";Hostname=`"packer`";CertificateThumbprint=`"$($Cert.Thumbprint)`"}"
+
+netsh advfirewall firewall add rule name="WinRM 5986" protocol=TCP dir=in localport=5986 action=allow
+
+net stop winrm
+sc config winrm start=auto
+net start winrm
+
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope LocalMachine
+</powershell>
