@@ -62,10 +62,9 @@ class AWSPackerJsonTemplate < Template
 end
 
 class AWSSetupWinRMTemplate < Template
-  def initialize(template, cert, password)
+  def initialize(template, cert)
     super(template)
     @cert = cert
-    @password = password
   end
 end
 

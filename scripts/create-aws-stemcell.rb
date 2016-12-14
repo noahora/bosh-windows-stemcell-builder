@@ -8,6 +8,7 @@ require 'tmpdir'
 require 'fileutils'
 require 'mkmf'
 require 'json'
+require 'tempfile'
 require_relative '../erb_templates/templates.rb'
 
 VERSION = File.read("version/number").chomp
@@ -76,43 +77,29 @@ output_dir = File.absolute_path(OUTPUT_DIR)
 BUILDER_PATH = File.expand_path("../..", __FILE__)
 aws_config = File.join(BUILDER_PATH, "aws")
 
-FileUtils.mv(BOSH_AGENT_DEPS_PATH, File.join(aws_config, "agent-dependencies.zip"))
+FileUtils.cp(BOSH_AGENT_DEPS_PATH, File.join(aws_config, "agent-dependencies.zip"))
 
-setup_winrm = Tempfile.new(['setup_winrm','.txt']).tap(&:close).path
-
-
-File.write('/tmp/myconfig.cnf') do
-  <<-EOF
-[req]
-distinguished_name = req_distinguished_name
-prompt = no
-[req_distinguished_name]
-CN = packer
-[x509_ext]
-basicConstraints = critical, CA:true
-keyUsage = critical,digitalSignature,cRLSign,keyCertSign
-extendedKeyUsage = serverAuth,clientAuth
-EOF
-end
-
-`openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -config /tmp/myconfig.cnf -extensions x509_ext`
-`openssl pkcs12 -export -inkey key.pem -in cert.pem -out file.p12 -name "My Certificate" -passout pass:`
-cert = cat that file
-AWSSetupWinRMTemplate.new(setup_winrm, cert, password)
-AWSPackerJsonTemplate.new("#{BUILDER_PATH}/erb_templates/aws/packer.json.erb",
-                          STEMCELL_REGIONS, AWS_ACCESS_KEY, AWS_SECRET_KEY,
-                          AMI_NAME, AGENT_URL, setup_winrm).save(aws_config)
-abort("foo")
-
-amis = run_packer(File.join(aws_config, "packer.json"))
-
-if amis.nil? || amis.empty?
-  abort("ERROR: could not parse AMI IDs")
-end
-
-File.write(File.join("amis","amis.json"),amis.to_json)
+exec_command("openssl req -x509 -newkey rsa:4096 -keyout /tmp/key.pem -out /tmp/cert.pem -days 365 -nodes -config #{__dir__}/openssl.config -extensions x509_ext")
+exec_command('openssl pkcs12 -export -inkey /tmp/key.pem -in /tmp/cert.pem -out /tmp/cert.p12 -name "My Certificate" -passout pass:')
+exec_command('openssl base64 -in /tmp/cert.p12 -out /tmp/cert-b64.p12')
+FileUtils.mv('/tmp/cert.pem', '/usr/local/share/ca-certificates/packer.crt')
+exec_command('update-ca-certificates')
 
 Dir.mktmpdir do |dir|
+  AWSSetupWinRMTemplate.new("#{BUILDER_PATH}/erb_templates/aws/setup_winrm.txt.erb",
+                            File.read('/tmp/cert-b64.p12')).save(dir)
+  AWSPackerJsonTemplate.new("#{BUILDER_PATH}/erb_templates/aws/packer.json.erb",
+                            STEMCELL_REGIONS, AWS_ACCESS_KEY, AWS_SECRET_KEY,
+                            AMI_NAME, AGENT_URL, File.join(dir, 'setup_winrm.txt')).save(aws_config)
+
+  amis = run_packer(File.join(aws_config, "packer.json"))
+
+  if amis.nil? || amis.empty?
+    abort("ERROR: could not parse AMI IDs")
+  end
+
+  File.write(File.join("amis","amis.json"),amis.to_json)
+
   MFTemplate.new("#{BUILDER_PATH}/erb_templates/aws/stemcell.MF.erb", VERSION, amis: amis, os_version: OS_VERSION).save(dir)
   ApplySpecTemplate.new("#{BUILDER_PATH}/erb_templates/apply_spec.yml.erb", AGENT_COMMIT).save(dir)
   exec_command("touch #{dir}/image")
