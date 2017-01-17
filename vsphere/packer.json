@@ -114,7 +114,7 @@
     },
     {
       "type": "file",
-      "source": "../../windows-stemcell-dependencies/vmware-tools/VMware-tools.exe",
+      "source": "../../windows-stemcell-dependencies/VMware-tools/VMware-tools.exe",
       "destination": "C:\\VMWare-tools.exe"
     },
     {
