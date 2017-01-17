@@ -113,6 +113,11 @@
       "destination": "C:\\LGPO.exe"
     },
     {
+      "type": "file",
+      "source": "../../windows-stemcell-dependencies/vmware-tools/VMware-tools.exe",
+      "destination": "C:\\VMWare-tools.exe"
+    },
+    {
       "type": "windows-shell",
       "scripts": [
         "scripts/compile-dotnet-assemblies.bat",
@@ -130,9 +135,9 @@
         "../scripts/setup_agent.ps1",
         "scripts/agent_config.ps1",
         "../scripts/cleanup-windows-features.ps1",
-        "scripts/cleanup-temp-directories.ps1",
         "../scripts/disable-winrm.ps1",
         "../scripts/set-firewall.ps1",
+        "scripts/cleanup-temp-directories.ps1",
         "scripts/compact.ps1"
       ]
     }
