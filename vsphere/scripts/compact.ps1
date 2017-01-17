@@ -11,21 +11,35 @@ function Unzip
     Remove-Item -Path $zipfile -Force
 }
 
+
 $UltradefragZip = "C:\ultradefrag.zip"
-$UltradefragBinary = "ultradefrag-portable-7.0.1.amd64\udefrag.exe"
 
 if (-Not (Test-Path $UltradefragZip)) {
     Write-Error "compact: missing dependency: ${UltradefragZip}"
 }
 
-Unzip $UltradefragZip "C:\Windows\Temp\"
-
-if (-Not (Test-Path "C:\Windows\Temp\ultradefrag-portable-7.0.1.amd64\udefrag.exe")) {
-    Write-Error "compact: missing ultradefrag"
+function Cleanup
+{
+    Remove-Item -Path $UltradefragZip -Force
 }
 
-C:\Windows\Temp\ultradefrag-portable-7.0.1.amd64\udefrag.exe --optimize --repeat C:
+
+Unzip $UltradefragZip "C:\Windows\Temp\"
+
+$Script:udefragExe=""
+Get-ChildItem -Path "C:\Windows\Temp" -Recurse | ForEach-Object {
+    if ($_.Name -eq "udefrag.exe") {
+        $Script:udefragExe = $_.FullName
+    }
+}
+if ($Script:udefragExe -eq "") {
+    Cleanup
+    Write-Error "compact: missing udefrag.exe"
+}
+
+& $Script:udefragExe --optimize --repeat C:
 if ($LASTEXITCODE -ne 0) {
+    Cleanup
     Write-Error "Error: ultradefrag exited with code ${LASTEXITCODE}"
 }
 
@@ -48,5 +62,6 @@ if($Stream) {
     $Stream.Close()
 }
 Remove-Item -Path $FilePath -Force
+Cleanup
 
 Exit 0
