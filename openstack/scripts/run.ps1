@@ -1,8 +1,8 @@
 # This will simply be a script to MANUALLY setup the agent.
 # It is not fully implemented.
 
-# $ErrorActionPreference = "Stop";
-# trap { $host.SetShouldExit(1) }
+$ErrorActionPreference = "Stop";
+trap { $host.SetShouldExit(1) }
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 function Unzip
@@ -63,7 +63,6 @@ Unzip "C:\Users\Administrator\deps.zip" "${DepsDir}"
 # C:\bosh
 $boshRoot=@(
     "bosh-agent.exe",
-    "pipe.exe",
     "service_wrapper.exe",
     "service_wrapper.xml"
 )
@@ -79,7 +78,8 @@ $boshBin=(
     "bosh-blobstore-s3.exe",
     "job-service-wrapper.exe",
     "tar.exe",
-    "zlib1.dll"
+    "zlib1.dll",
+    "pipe.exe"
 )
 foreach ($name in $boshBin) {
     Move-Item "${DepsDir}\${name}" "C:\var\vcap\bosh\bin\${name}"
@@ -132,6 +132,96 @@ C:\bosh\service_wrapper.exe install
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Error installing BOSH service wrapper"
 }
+
+# install redhat drivers for openstack
+Mount-DiskImage -ImagePath ${DepsDir}\virtio-win-0.1.126.iso
+New-Item -ItemType "file" -path "${DepsDir}\redhat.cert.cer" -Value @"
+-----BEGIN CERTIFICATE-----
+MIIFBjCCA+6gAwIBAgIQVsbSZ63gf3LutGA7v4TOpTANBgkqhkiG9w0BAQUFADCB
+tDELMAkGA1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMR8wHQYDVQQL
+ExZWZXJpU2lnbiBUcnVzdCBOZXR3b3JrMTswOQYDVQQLEzJUZXJtcyBvZiB1c2Ug
+YXQgaHR0cHM6Ly93d3cudmVyaXNpZ24uY29tL3JwYSAoYykxMDEuMCwGA1UEAxMl
+VmVyaVNpZ24gQ2xhc3MgMyBDb2RlIFNpZ25pbmcgMjAxMCBDQTAeFw0xNjAzMTgw
+MDAwMDBaFw0xODEyMjkyMzU5NTlaMGgxCzAJBgNVBAYTAlVTMRcwFQYDVQQIEw5O
+b3J0aCBDYXJvbGluYTEQMA4GA1UEBxMHUmFsZWlnaDEWMBQGA1UEChQNUmVkIEhh
+dCwgSW5jLjEWMBQGA1UEAxQNUmVkIEhhdCwgSW5jLjCCASIwDQYJKoZIhvcNAQEB
+BQADggEPADCCAQoCggEBAMA3SYpIcNIEzqqy1PNimjt3bVY1KuIuvDABkx8hKUG6
+rl9WDZ7ibcW6f3cKgr1bKOAeOsMSDu6i/FzB7Csd9u/a/YkASAIIw48q9iD4K6lb
+Kvd+26eJCUVyLHcWlzVkqIEFcvCrvaqaU/YlX/antLWyHGbtOtSdN3FfY5pvvTbW
+xf8PJBWGO3nV9CVL1DMK3wSn3bRNbkTLttdIUYdgiX+q8QjbM/VyGz7nA9UvGO0n
+FWTZRdoiKWI7HA0Wm7TjW3GSxwDgoFb2BZYDDNSlfzQpZmvnKth/fQzNDwumhDw7
+tVicu/Y8E7BLhGwxFEaP0xZtENTpn+1f0TxPxpzL2zMCAwEAAaOCAV0wggFZMAkG
+A1UdEwQCMAAwDgYDVR0PAQH/BAQDAgeAMCsGA1UdHwQkMCIwIKAeoByGGmh0dHA6
+Ly9zZi5zeW1jYi5jb20vc2YuY3JsMGEGA1UdIARaMFgwVgYGZ4EMAQQBMEwwIwYI
+KwYBBQUHAgEWF2h0dHBzOi8vZC5zeW1jYi5jb20vY3BzMCUGCCsGAQUFBwICMBkM
+F2h0dHBzOi8vZC5zeW1jYi5jb20vcnBhMBMGA1UdJQQMMAoGCCsGAQUFBwMDMFcG
+CCsGAQUFBwEBBEswSTAfBggrBgEFBQcwAYYTaHR0cDovL3NmLnN5bWNkLmNvbTAm
+BggrBgEFBQcwAoYaaHR0cDovL3NmLnN5bWNiLmNvbS9zZi5jcnQwHwYDVR0jBBgw
+FoAUz5mp6nsm9EvJjo/X8AUm7+PSp50wHQYDVR0OBBYEFL/39F5yNDVDib3B3Uk3
+I8XJSrxaMA0GCSqGSIb3DQEBBQUAA4IBAQDWtaW0Dar82t1AdSalPEXshygnvh87
+Rce6PnM2/6j/ijo2DqwdlJBNjIOU4kxTFp8jEq8oM5Td48p03eCNsE23xrZl5qim
+xguIfHqeiBaLeQmxZavTHPNM667lQWPAfTGXHJb3RTT4siowcmGhxwJ3NGP0gNKC
+PHW09x3CdMNCIBfYw07cc6h9+Vm2Ysm9MhqnVhvROj+AahuhvfT9K0MJd3IcEpjX
+Z7aMX78Vt9/vrAIUR8EJ54YGgQsF/G9Adzs6fsfEw5Nrk8R0pueRMHRTMSroTe0V
+Ae2nvuUU6rVI30q8+UjQCxu/ji1/JnitNkUyOPyC46zL+kfHYSnld8U1
+-----END CERTIFICATE-----
+"@
+certutil -addstore TrustedPublisher "${DepsDir}\redhat.cert.cer"
+pnputil -i -a E:\viostor\2k12R2\amd64\viostor.inf
+pnputil -i -a E:\NetKVM\2k12R2\amd64\netkvm.inf
+
+# install cloudbase init
+Start-Process -Wait -FilePath msiexec -ArgumentList "/i  ${DepsDir}\CloudbaseInitSetup_0_9_9_x64.msi /qn /l*v C:\log.txt USERNAME=Administrator"
+
+# overwrite unattend.xml for cloudbase to change administrator password
+
+New-Item -ItemType "file" -path "C:\Program Files\Cloudbase Solutions\Cloudbase-Init\LocalScripts\setup-admin.ps1" -Value @'
+$NewPassword = "Password123!"
+$AdminUser = [ADSI]"WinNT://${env:computername}/Administrator,User"
+$AdminUser.SetPassword($NewPassword)
+$AdminUser.passwordExpired = 0
+$AdminUser.setinfo()
+'@
+
+New-Item -ItemType "file" -path "C:\Program Files\Cloudbase Solutions\Cloudbase-Init\conf\Unattend.xml" -Force -Value @"
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+  <settings pass="generalize">
+    <component name="Microsoft-Windows-PnpSysprep" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <PersistAllDeviceInstalls>true</PersistAllDeviceInstalls>
+    </component>
+  </settings>
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <NetworkLocation>Work</NetworkLocation>
+        <ProtectYourPC>1</ProtectYourPC>
+        <SkipMachineOOBE>true</SkipMachineOOBE>
+        <SkipUserOOBE>true</SkipUserOOBE>
+      </OOBE>
+    </component>
+  </settings>
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <RunSynchronous>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <Path>"C:\Program Files\Cloudbase Solutions\Cloudbase-Init\Python\Scripts\cloudbase-init.exe" --config-file "C:\Program Files\Cloudbase Solutions\Cloudbase-Init\conf\cloudbase-init-unattend.conf"</Path>
+          <Description>Run Cloudbase-Init to set the hostname</Description>
+          <WillReboot>Never</WillReboot>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>2</Order>
+          <Path>C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File "C:\Program Files\Cloudbase Solutions\Cloudbase-Init\LocalScripts\setup-admin.ps1"</Path>
+          <Description>password</Description>
+          <WillReboot>Always</WillReboot>
+        </RunSynchronousCommand>
+      </RunSynchronous>
+    </component>
+  </settings>
+</unattend>
+"@
 
 # TODO (CEV): Need to test with OpenStack and CloudInit
 # before re-enabling.
@@ -232,3 +322,7 @@ cmd.exe /c 'net start winrm'
 # Allow Inbound and Outbound
 set-netfirewallprofile -all -DefaultInboundAction Allow -DefaultOutboundAction Allow
 "Open firewall for inbound and outbound (Exit Code: ${LASTEXITCODE})"
+
+# final sysprep
+
+C:\Windows\System32\Sysprep\sysprep.exe /oobe /generalize /quiet /shutdown /unattend:'C:\Program Files\Cloudbase Solutions\Cloudbase-Init\conf\Unattend.xml'
