@@ -1,0 +1,66 @@
+{
+  "variables": {
+    "source_path": null,
+    "administrator_password": null,
+    "output_directory": null
+  },
+  "builders": [
+    {
+      "type": "vmware-vmx",
+
+      "source_path": "{{user `source_path`}}",
+
+      "headless": false,
+      "boot_wait": "2m",
+
+      "communicator": "winrm",
+      "winrm_username": "Administrator",
+      "winrm_password": "{{user `administrator_password`}}",
+      "winrm_timeout": "5m",
+      "winrm_insecure": true,
+
+      "shutdown_timeout": "15m",
+      "shutdown_command": "C:\\Windows\\System32\\shutdown.exe /s",
+
+      "vmx_data": {
+        "memsize": "4096",
+        "numvcpus": "4"
+      },
+      "output_directory": "{{user `output_directory`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "inline": [
+        "if (Test-Path C:\\provision) { Remove-Item -Path C:\\provision -Recurse -Force }",
+        "New-Item -ItemType 'directory' -Path C:\\provision"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "scripts/update-provisioner.ps1",
+      "destination": "C:\\provision\\update-provisioner.ps1"
+    },
+    {
+      "type": "file",
+      "source": "scripts/autorun-updates.ps1",
+      "destination": "C:\\provision\\autorun-updates.ps1"
+    },
+    {
+      "type": "file",
+      "source": "scripts/PowershellUtils.psm1",
+      "destination": "C:\\provision\\PowershellUtils.psm1"
+    },
+    {
+      "type": "file",
+      "source": "../../windows-stemcell-dependencies/ps-windowsupdate/PSWindowsUpdate.zip",
+      "destination": "C:\\provision\\PSWindowsUpdate.zip"
+    },
+    {
+      "type": "windows-restart",
+      "restart_command": "powershell.exe C:\\provision\\autorun-updates.ps1",
+      "restart_timeout": "12h"
+    }
+  ]
+}
