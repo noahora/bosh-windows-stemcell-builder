@@ -2,7 +2,9 @@
   "variables": {
     "source_path": null,
     "administrator_password": null,
-    "output_directory": null
+    "output_directory": null,
+    "memsize": "4096",
+    "numvcpus": "4"
   },
   "builders": [
     {
@@ -23,8 +25,8 @@
       "shutdown_command": "C:\\Windows\\System32\\shutdown.exe /s",
 
       "vmx_data": {
-        "memsize": "4096",
-        "numvcpus": "4"
+        "memsize": "{{user `memsize`}}",
+        "numvcpus": "{{user `numvcpus`}}"
       },
       "output_directory": "{{user `output_directory`}}"
     }

@@ -1,0 +1,18 @@
+---
+platform: windows
+
+inputs:
+  - name: version
+  - name: compiled-agent
+  - name: stemcell-builder
+  - name: windows-stemcell-dependencies
+params:
+  VMX_DIR: replace-me
+  ADMINISTRATOR_PASSWORD: replace-me
+  OUTPUT_DIR: replace-me
+outputs:
+  - name: bosh-windows-stemcell # WARN: Actually do this!
+run:
+  path: ruby.exe
+  args:
+    - stemcell-builder/scripts/create-vmx-stemcell.rb

@@ -1,0 +1,13 @@
+---
+platform: windows
+
+inputs:
+  - name: stemcell-builder
+  - name: windows-stemcell-dependencies
+params:
+  VMX_DIR: replace-me
+  ADMINISTRATOR_PASSWORD: replace-me
+run:
+  path: ruby.exe
+  args:
+    - stemcell-builder/scripts/create-vmx-add-updates.rb
