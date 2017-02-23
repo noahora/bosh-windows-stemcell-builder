@@ -42,14 +42,14 @@ module Stemcell
 
       def build
         image_path = create_image
-        sha=''
+        sha = Digest::SHA1.file(image_path).hexdigest
         manifest = Manifest::Azure.new('bosh-azure-stemcell-name', @version, sha, @os).dump
         super(iaas: 'azure', is_light: false, image_path: image_path, manifest: manifest)
       end
 
       private
         def packer_config
-          'some-packer-config'
+          Packer::Config::Azure.new().dump
         end
 
         def create_image
