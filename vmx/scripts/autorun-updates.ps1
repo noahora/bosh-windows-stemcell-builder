@@ -1,3 +1,5 @@
+param([String]$AdminPassword="Password123!")
+
 # UPDATES
 $ScriptDirectory = Split-Path $MyInvocation.MyCommand.Path -Parent
 Import-Module (Join-Path "$ScriptDirectory" "PowershellUtils")
@@ -26,7 +28,7 @@ function Add-AutoRun() {
     }
 }
 
-Add-AutoRun -AdminPassword "Password123!"
+Add-AutoRun -AdminPassword $AdminPassword
 
 LogWrite $UpdateLog "InitialSetup: disabling service: WinRM"
 Get-Service | Where-Object {$_.Name -eq "WinRM" } | Set-Service -StartupType Disabled

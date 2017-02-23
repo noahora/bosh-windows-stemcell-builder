@@ -1,3 +1,5 @@
+param([String]$AdminPassword="Password123!")
+
 # DO NOT CHECK FOR ERRORS IN THIS FILE!
 
 # UPDATES
@@ -268,7 +270,7 @@ $Script:InstalledNewUpdates=$true
 if ($PendingUpdates) {
     LogWrite $UpdateLog "Preparing to install pending updates"
 
-    Add-AutoRun -AdminPassword "Password123!"
+    Add-AutoRun -AdminPassword $AdminPassword
 
     while (Update-Count -ge 0) {
         # TODO (CEV): Find persistent (through restarts) way to signal updates were installed.

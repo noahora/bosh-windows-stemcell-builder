@@ -66,6 +66,7 @@
     {
       "type": "powershell",
       "scripts": [
+        "scripts/check-updates.ps1",
         "../vsphere/scripts/add-vcap-group.ps1",
         "scripts/run-policies.ps1",
         "../scripts/setup_agent.ps1",
