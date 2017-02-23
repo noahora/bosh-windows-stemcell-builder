@@ -17,29 +17,43 @@ describe Stemcell::Builder do
         version = '1234.0'
         agent_commit = 'some-agent-commit'
         name = 'bosh-azure-stemcell-name'
-        sha = 'da39a3ee5e6b4b0d3255bfef95601890afd80709'
         config = 'some-packer-config'
         command = 'build'
+        manifest_contents = 'manifest_contents'
+        apply_spec_contents = 'apply_spec_contents'
         packer_vars = {some_var: 'some-value'}
+        downloaded_image_path = File.join(output_dir, 'root.vhd')
+        File.new(downloaded_image_path, "w+")
+        packaged_image_path = File.join(output_dir, 'image')
+        File.new(packaged_image_path, 'w+')
+        sha = Digest::SHA1.file(packaged_image_path).hexdigest
+
+        packer_config = double(:packer_config)
+        allow(packer_config).to receive(:dump).and_return(config)
+        allow(Packer::Config::Azure).to receive(:new).and_return(packer_config)
 
         packer_runner = double(:packer_runner)
-        File.new(File.join(output_dir, 'disk-image'), "w+")
-        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return("azure-arm,artifact,0\\nOSDiskUriReadOnlySas: file://#{File.join(output_dir, 'disk-image')}")
-        azure_manifest = double(:azure_manifest)
-        allow(azure_manifest).to receive(:dump).and_return('manifest-contents')
-        azure_apply = double(:azure_apply)
-        allow(azure_apply).to receive(:dump).and_return('apply-spec-contents')
-
+        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return("azure-arm,artifact,0\\nOSDiskUriReadOnlySas: file://#{downloaded_image_path}")
         allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
+
+        allow(Stemcell::Packager).to receive(:package_image)
+          .with(image_path: downloaded_image_path, archive: true, output_dir: output_dir)
+          .and_return(packaged_image_path)
+
+        azure_manifest = double(:azure_manifest)
+        allow(azure_manifest).to receive(:dump).and_return(manifest_contents)
+        azure_apply = double(:azure_apply)
+        allow(azure_apply).to receive(:dump).and_return(apply_spec_contents)
+
         allow(Stemcell::Manifest::Azure).to receive(:new).with(name, version, sha, os).and_return(azure_manifest)
         allow(Stemcell::ApplySpec).to receive(:new).with(agent_commit).and_return(azure_apply)
         allow(Stemcell::Packager).to receive(:package).with(iaas: 'azure',
                                                             os: os,
                                                             is_light: false,
                                                             version: version,
-                                                            image_path: File.join(output_dir, 'image'),
-                                                            manifest: 'manifest-contents',
-                                                            apply_spec: 'apply-spec-contents',
+                                                            image_path: packaged_image_path,
+                                                            manifest: manifest_contents,
+                                                            apply_spec: apply_spec_contents,
                                                             output_dir: output_dir
                                                            ).and_return('path-to-stemcell')
 
