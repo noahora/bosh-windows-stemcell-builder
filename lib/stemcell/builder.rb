@@ -1,11 +1,12 @@
 module Stemcell
   class Builder
     class Base
-      def initialize(os:, output_dir:, version:, agent_commit:)
+      def initialize(os:, output_dir:, version:, agent_commit:, packer_vars:)
         @os = os
         @output_dir = output_dir
         @version = version
         @agent_commit = agent_commit
+        @packer_vars = packer_vars
       end
 
       def build(iaas:, is_light:, image_path:, manifest:)
@@ -34,12 +35,14 @@ module Stemcell
       end
     end
 
-    class Azure < Base
-      def initialize(packer_vars:, **args)
-        @packer_vars = packer_vars
-        super(args)
+    class Gcp < Base
+      def build
+        manifest = Manifest::Gcp.new(@version, @os, '').dump
+        super(iaas: 'gcp', is_light: true, image_path: '', manifest: manifest)
       end
+    end
 
+    class Azure < Base
       def build
         image_path = create_image
         sha = Digest::SHA1.file(image_path).hexdigest
