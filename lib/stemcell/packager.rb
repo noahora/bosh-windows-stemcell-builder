@@ -1,3 +1,6 @@
+require 'zlib'
+require 'rubygems/package'
+
 module Stemcell
   class Packager
     class InvalidImagePathError < ArgumentError

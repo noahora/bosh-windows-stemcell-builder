@@ -17,7 +17,7 @@ describe Stemcell::Builder do
         version = '1234.0'
         amis = 'some-amis'
         agent_commit = 'some-agent-commit'
-        packer_amis = [0, ",artifact,0,id,some-region-id:some-ami-id"]
+        packer_output = ",artifact,0,id,some-region-id:some-ami-id"
         parsed_packer_amis = [{region: 'some-region-id', ami_id: 'some-ami-id'}]
         aws_access_key = 'some-aws-access-key'
         aws_secret_key = 'some-aws-secret-key'
@@ -28,7 +28,7 @@ describe Stemcell::Builder do
         allow(Packer::Config::Aws).to receive(:new).with(aws_access_key, aws_secret_key, amis).and_return(packer_config)
 
         packer_runner = double(:packer_runner)
-        allow(packer_runner).to receive(:run).with('build', packer_vars).and_return(packer_amis)
+        allow(packer_runner).to receive(:run).with('build', packer_vars).and_yield(packer_output).and_return(0)
         allow(Packer::Runner).to receive(:new).with('some-packer-config').and_return(packer_runner)
 
         aws_manifest = double(:aws_manifest)

@@ -1,6 +1,7 @@
 require 'tempfile'
 require 'json'
 require 'English'
+require 'open3'
 
 module Packer
   class Runner
@@ -13,7 +14,7 @@ module Packer
 
     def run(command, args={})
       config_file = Tempfile.new('')
-      config_file.write(JSON.dump(@config))
+      config_file.write(@config)
       config_file.close
 
       args_combined = ''
@@ -21,8 +22,14 @@ module Packer
         args_combined += "-var \"#{name}=#{value}\""
       end
 
-      output = `packer #{command} -machine-readable #{args_combined} #{config_file.path}`
-      [$CHILD_STATUS.exitstatus, output]
+      packer_command = "packer #{command} -machine-readable #{args_combined} #{config_file.path}"
+      puts packer_command
+      `cat #{config_file.path}`
+
+      Open3.popen3(packer_command) do |stdin, stdout, stderr, wait_thr|
+        yield(stdout) if block_given?
+        return wait_thr.value
+      end
     end
   end
 end

@@ -23,13 +23,15 @@ describe Stemcell::Builder do
         packer_vars = {some_var: 'some-value'}
         image_url = 'some-image-url'
         account_json = 'some-account-json'
+        packer_output = ",artifact,0,id,#{image_url}"
 
         packer_config = double(:packer_config)
         allow(packer_config).to receive(:dump).and_return(config)
         allow(Packer::Config::Gcp).to receive(:new).with(account_json).and_return(packer_config)
 
         packer_runner = double(:packer_runner)
-        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return([0,",artifact,0,id,#{image_url}"])
+        allow(packer_runner).to receive(:run).with(command, packer_vars).
+          and_yield(packer_output).and_return(0)
         allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
 
         gcp_manifest = double(:gcp_manifest)
