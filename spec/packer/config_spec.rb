@@ -87,7 +87,6 @@ describe Packer::Config do
         ]
         config = Packer::Config::Aws.new('accesskey',
                                          'secretkey',
-                                         'aminame1',
                                          regions).dump
         puts config
         runner = Packer::Runner.new(config)
