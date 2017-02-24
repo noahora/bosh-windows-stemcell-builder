@@ -14,11 +14,12 @@ module Stemcell
         end
 
         def get_image
-          packer_output = Packer::Runner.new(packer_config).run('build', @packer_vars)[1]
           disk_uri = nil
-          packer_output.each_line do |line|
-            # puts line
-            disk_uri ||= parse_disk_uri(line)
+          Packer::Runner.new(packer_config).run('build', @packer_vars) do |stdout|
+            stdout.each_line do |line|
+              puts line
+              disk_uri ||= parse_disk_uri(line)
+            end
           end
           download_disk(disk_uri)
           Packager.package_image(image_path: "#{@output_dir}/root.vhd", archive: true, output_dir: @output_dir)

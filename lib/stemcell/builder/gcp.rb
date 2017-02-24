@@ -18,11 +18,12 @@ module Stemcell
         end
 
         def get_image
-          packer_output = Packer::Runner.new(packer_config).run('build', @packer_vars)[1]
           image_url = nil
-          packer_output.each_line do |line|
-            # puts line
-            image_url ||= parse_image_url(line)
+          Packer::Runner.new(packer_config).run('build', @packer_vars) do |stdout|
+            stdout.each_line do |line|
+              puts line
+              image_url ||= parse_image_url(line)
+            end
           end
           image_url
         end

@@ -48,7 +48,7 @@ module Packer
             'associate_public_ip_address' => true,
             'communicator' => 'winrm',
             'winrm_username' => 'Administrator',
-            'user_data_file' => 'setup_winrm.txt',
+            'user_data_file' => 'scripts/aws/setup_winrm.txt',
             'security_group_id' => region['security_group'],
             'ami_groups' => 'all'
           )
@@ -200,13 +200,13 @@ module Packer
     class Provisioners
       AGENT_ZIP = {
         'type' => 'file',
-        'source' => '../../compiled-agent/agent.zip',
+        'source' => 'compiled-agent/agent.zip',
         'destination' => 'C:\boshagent.zip'
       }.freeze
 
       AGENT_DEPS_ZIP = {
         'type' => 'file',
-        'source' => '../../compiled-agent/agent-dependencies.zip',
+        'source' => 'compiled-agent/agent-dependencies.zip',
         'destination' => 'C:\boshagent-dependencies.zip'
       }.freeze
 
@@ -228,7 +228,7 @@ module Packer
 
       INSTALL_WINDOWS_FEATURES = {
         'type' => 'powershell',
-        'scripts' => ['../scripts/install-windows-features.ps1']
+        'scripts' => ['scripts/add-windows-features.ps1']
       }.freeze
 
       LGPO_EXE = {
@@ -270,7 +270,7 @@ module Packer
 
       SET_EC2_PASSWORD = {
         'type' => 'powershell',
-        'scripts' => ['scripts/ec2-set-password.ps1']
+        'scripts' => ['scripts/aws/ec2-set-password.ps1']
       }.freeze
 
       CLEANUP_TEMP_DIRS = {
@@ -286,12 +286,12 @@ module Packer
       COMMON_POWERSHELL = {
         'type' => 'powershell',
         'scripts' => [
-          '../scripts/setup_agent.ps1',
-          'scripts/agent_config.ps1',
-          '../scripts/cleanup-windows-features.ps1',
-          '../scripts/disable-services.ps1',
-          '../scripts/set-firewall.ps1',
-          '../scripts/cleanup-artifacts.ps1'
+          'scripts/setup_agent.ps1',
+          'scripts/aws/agent_config.ps1',
+          'scripts/cleanup-windows-features.ps1',
+          'scripts/disable-services.ps1',
+          'scripts/set-firewall.ps1',
+          'scripts/cleanup-artifacts.ps1'
         ]
       }.freeze
     end

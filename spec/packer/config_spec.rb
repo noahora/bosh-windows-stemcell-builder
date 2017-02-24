@@ -47,7 +47,7 @@ describe Packer::Config do
           'associate_public_ip_address' => true,
           'communicator' => 'winrm',
           'winrm_username' => 'Administrator',
-          'user_data_file' => 'setup_winrm.txt',
+          'user_data_file' => 'scripts/aws/setup_winrm.txt',
           'security_group_id' => 'sg1',
           'ami_groups' => 'all'
         )

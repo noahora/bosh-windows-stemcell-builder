@@ -27,13 +27,15 @@ describe Stemcell::Builder do
         packaged_image_path = File.join(output_dir, 'image')
         File.new(packaged_image_path, 'w+')
         sha = Digest::SHA1.file(packaged_image_path).hexdigest
+        packer_output = "azure-arm,artifact,0\\nOSDiskUriReadOnlySas: file://#{downloaded_image_path}"
 
         packer_config = double(:packer_config)
         allow(packer_config).to receive(:dump).and_return(config)
         allow(Packer::Config::Azure).to receive(:new).and_return(packer_config)
 
         packer_runner = double(:packer_runner)
-        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return([0,"azure-arm,artifact,0\\nOSDiskUriReadOnlySas: file://#{downloaded_image_path}"])
+        allow(packer_runner).to receive(:run).with(command, packer_vars).
+          and_yield(packer_output).and_return(0)
         allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
 
         allow(Stemcell::Packager).to receive(:package_image)
