@@ -83,10 +83,18 @@ def find_vmx_file(dir)
   return files[0]
 end
 
-# make sure we have ovftool and packer
+def install_ovftool
+  ovftoolBundle = "windows-stemcell-dependencies/ovftool/VMware-ovftool.bundle"
+  File.chmod(0777, ovftoolBundle)
+  exec_command("#{ovftoolBundle} --required --eulas-agreed")
+end
+
+install_ovftool
+
 if find_executable('ovftool') == nil
   abort("ERROR: cannot find 'ovftool' on the path")
 end
+
 if find_executable('packer') == nil
   abort("ERROR: cannot find 'packer' on the path")
 end
