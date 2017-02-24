@@ -14,7 +14,7 @@ module Stemcell
         end
 
         def get_image
-          packer_output = Packer::Runner.new(packer_config).run('build', @packer_vars)
+          packer_output = Packer::Runner.new(packer_config).run('build', @packer_vars)[1]
           disk_uri = nil
           packer_output.each_line do |line|
             # puts line

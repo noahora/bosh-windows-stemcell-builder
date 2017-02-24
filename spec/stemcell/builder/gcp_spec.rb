@@ -29,7 +29,7 @@ describe Stemcell::Builder do
         allow(Packer::Config::Gcp).to receive(:new).with(account_json).and_return(packer_config)
 
         packer_runner = double(:packer_runner)
-        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return(",artifact,0,id,#{image_url}")
+        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return([0,",artifact,0,id,#{image_url}"])
         allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
 
         gcp_manifest = double(:gcp_manifest)

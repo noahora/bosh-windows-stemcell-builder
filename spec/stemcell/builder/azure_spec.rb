@@ -33,7 +33,7 @@ describe Stemcell::Builder do
         allow(Packer::Config::Azure).to receive(:new).and_return(packer_config)
 
         packer_runner = double(:packer_runner)
-        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return("azure-arm,artifact,0\\nOSDiskUriReadOnlySas: file://#{downloaded_image_path}")
+        allow(packer_runner).to receive(:run).with(command, packer_vars).and_return([0,"azure-arm,artifact,0\\nOSDiskUriReadOnlySas: file://#{downloaded_image_path}"])
         allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
 
         allow(Stemcell::Packager).to receive(:package_image)
