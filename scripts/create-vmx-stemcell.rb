@@ -12,11 +12,11 @@ require_relative '../erb_templates/templates.rb'
 
 # Concourse inputs
 VERSION = File.read("version/number").chomp
-
-VMX_DIR = ENV.fetch("VMX_DIR")
+VMX_DIR = File.absolute_path("vmx")
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH=File.expand_path("../..", __FILE__)
 OUTPUT_DIR = ENV.fetch("OUTPUT_DIR")
+
 
 puts "VMX_DIR: #{VMX_DIR}"
 puts "VERSION: #{VERSION}"

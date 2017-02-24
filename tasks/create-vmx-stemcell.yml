@@ -4,10 +4,10 @@ platform: windows
 inputs:
   - name: version
   - name: compiled-agent
+  - name: vmx
   - name: stemcell-builder
   - name: windows-stemcell-dependencies
 params:
-  VMX_DIR: replace-me
   ADMINISTRATOR_PASSWORD: replace-me
   OUTPUT_DIR: replace-me
 outputs:
