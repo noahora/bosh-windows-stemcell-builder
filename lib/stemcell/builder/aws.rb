@@ -9,7 +9,7 @@ module Stemcell
       end
 
       def build
-        packer_output = Packer::Runner.new(packer_config).run('build', @packer_vars)
+        packer_output = Packer::Runner.new(packer_config).run('build', @packer_vars)[1]
         parsed_packer_amis = parse_amis(packer_output)
         manifest = Manifest::Aws.new(@version, @os, parsed_packer_amis).dump
         super(iaas: 'aws', is_light: true, image_path: '', manifest: manifest)
