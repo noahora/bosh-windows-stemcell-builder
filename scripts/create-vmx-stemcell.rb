@@ -15,7 +15,7 @@ VERSION = File.read("version/number").chomp
 VMX_DIR = File.absolute_path("vmx")
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH=File.expand_path("../..", __FILE__)
-OUTPUT_DIR = ENV.fetch("OUTPUT_DIR")
+OUTPUT_DIR = File.absolute_path("bosh-windows-stemcell")
 
 
 puts "VMX_DIR: #{VMX_DIR}"
@@ -71,33 +71,6 @@ def packer_command(command, config_path, vars)
   end
 end
 
-def find_latest_vmx_dir(parent_dir)
-  latest_version = -1
-  latest_dirname = nil
-  pattern = File.join(parent_dir, '**/base-vmx-*').gsub('\\', '/')
-
-  Dir.glob(pattern) do |dirname|
-    puts "dirname: #{dirname}"
-
-    base = File.basename(dirname)
-    puts "base: #{base}"
-
-    version = base.scanf("base-vmx-%d")[0]
-    if version
-      version_number = version.to_i
-      if version_number > latest_version
-        latest_version = version_number
-        latest_dirname = dirname
-      end
-    end
-  end
-
-  if latest_version == -1
-    raise "Failed to find any vmx dirs in: #{parent_dir}"
-  end
-  return latest_dirname, latest_version
-end
-
 def find_vmx_file(dir)
   pattern = File.join(dir, "*.vmx").gsub('\\', '/')
   files = Dir.glob(pattern)
@@ -108,19 +81,6 @@ def find_vmx_file(dir)
     raise "Too many vmx files in directory: #{files}"
   end
   return files[0]
-end
-
-def tmpdir_name
-  path = File.join(Dir.tmpdir(), "packer-#{Time.now.to_i}")
-  n = 0
-  while File.exists?(path) && n < 100
-    path = File.join(Dir.tmpdir(), "packer-#{Time.now.to_i}-#{n}")
-    n += 1
-  end
-  if n == 100
-    raise "Error finding unique name for tmpdir!"
-  end
-  return File.absolute_path(path)
 end
 
 # make sure we have ovftool and packer
@@ -134,32 +94,14 @@ if find_executable('tar') == nil
   abort("ERROR: cannot find 'tar' on the path")
 end
 
-latest_dirname, latest_version = find_latest_vmx_dir(VMX_DIR)
-puts "latest vmx directory: #{latest_dirname}"
-puts "latest vmx version: #{latest_version}"
-
-latest_vmx = find_vmx_file(latest_dirname)
-puts "latest vmx file: #{latest_vmx}"
-
-new_dirname = File.join(VMX_DIR, "base-vmx-#{latest_version+1}")
-puts "new vmx directory: #{new_dirname}"
-
-dir = tmpdir_name()
-puts "temporary directory: #{dir}"
-
-FileUtils.mkdir_p(OUTPUT_DIR)
-output_dir = File.absolute_path(OUTPUT_DIR)
-
+latest_vmx = find_vmx_file(VMX_DIR)
+output_dir = OUTPUT_DIR
 stemcell_filename = File.join(output_dir, "bosh-stemcell-#{VERSION}-vsphere-esxi-windows2012R2-go_agent.tgz")
-puts "stemcell_filename: #{stemcell_filename}"
-if File.exists?(stemcell_filename)
-  raise "stemcell with name (#{stemcell_filename}) already exists - refusing to overwrite!"
-end
 
 begin
   stemcell_vars = {
     'source_path' => latest_vmx,
-    'output_directory' => dir,
+    'output_directory' => output_dir,
     'administrator_password' => ADMINISTRATOR_PASSWORD
   }
 
@@ -167,9 +109,9 @@ begin
   packer_command('build', packer_config, stemcell_vars)
 
   stemcell_vmx = find_vmx_file(dir)
-  puts "stemcell_vmx: #{stemcell_vmx}"
+  puts "new stemcell_vmx: #{stemcell_vmx}"
 
-  ova_file = File.join(dir, 'image.ova')
+  ova_file = File.join(output_dir, 'image.ova')
   exec_command("ovftool #{stemcell_vmx} #{ova_file}")
 
   image_file = File.join(dir, 'image')

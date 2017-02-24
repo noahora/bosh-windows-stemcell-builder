@@ -1,5 +1,9 @@
 ---
-platform: windows
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: pivotalgreenhouse/packer-base
 
 inputs:
   - name: version
@@ -7,12 +11,10 @@ inputs:
   - name: vmx
   - name: stemcell-builder
   - name: windows-stemcell-dependencies
+outputs:
+  - name: bosh-windows-stemcell
+
 params:
   ADMINISTRATOR_PASSWORD: replace-me
-  OUTPUT_DIR: replace-me
-outputs:
-  - name: bosh-windows-stemcell # WARN: Actually do this!
 run:
-  path: ruby.exe
-  args:
-    - stemcell-builder/scripts/create-vmx-stemcell.rb
+  path: stemcell-builder/scripts/create-vmx-stemcell.rb
