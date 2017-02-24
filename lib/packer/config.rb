@@ -23,10 +23,9 @@ module Packer
     end
 
     class Aws < Base
-      def initialize(aws_access_key, aws_secret_key, ami_name, regions)
+      def initialize(aws_access_key, aws_secret_key, regions)
         @aws_access_key = aws_access_key
         @aws_secret_key = aws_secret_key
-        @ami_name = ami_name
         @regions = regions
       end
 
@@ -41,7 +40,7 @@ module Packer
             'region' => region['name'],
             'source_ami' => region['base_ami'],
             'instance_type' => 'm4.xlarge',
-            'ami_name' => "#{@ami_name}-#{region['name']}",
+            'ami_name' => "BOSH-#{SecureRandom.uuid}-#{region['name']}",
             'vpc_id' => region['vpc_id'],
             'subnet_id' => region['subnet_id'],
             'associate_public_ip_address' => true,
@@ -63,10 +62,9 @@ module Packer
     end
 
     class Gcp < Base
-      def initialize(account_json_file, project_id, image_name)
+      def initialize(account_json_file)
         @account_json_file = account_json_file
-        @project_id = project_id
-        @image_name = image_name
+        @project_id = JSON.parse(@account_json_file)['project_id']
       end
 
       def builders
@@ -80,7 +78,7 @@ module Packer
             'image_family' => 'windows-2012-r2',
             'zone' => 'us-east1-c',
             'disk_size' => 50,
-            'image_name' =>  @image_name,
+            'image_name' =>  "packer-#{Time.now.to_i}",
             'machine_type' => 'n1-standard-4',
             'omit_external_ip' => false,
             'communicator' => 'winrm',
