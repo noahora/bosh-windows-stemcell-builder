@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Packer
   module Config
     class Base
@@ -62,16 +64,16 @@ module Packer
     end
 
     class Gcp < Base
-      def initialize(account_json_file)
-        @account_json_file = account_json_file
-        @project_id = JSON.parse(@account_json_file)['project_id']
+      def initialize(account_json)
+        @account_json = account_json
+        @project_id = JSON.parse(@account_json)['project_id']
       end
 
       def builders
         [
           {
             'type' => 'googlecompute',
-            'account_file' => @account_json_file,
+            'account_file' => @account_json,
             'project_id' => @project_id,
             'tags' => ['winrm'],
             'source_image' => 'windows-2012-r2-winrm',

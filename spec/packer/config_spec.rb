@@ -33,9 +33,8 @@ describe Packer::Config do
         ]
         builders = Packer::Config::Aws.new('accesskey',
                                            'secretkey',
-                                           'aminame1',
                                            regions).builders
-        expect(builders[0]).to eq(
+        expect(builders[0]).to include(
           'name' => 'amazon-ebs-region1',
           'type' => 'amazon-ebs',
           'access_key' => 'accesskey',
@@ -43,7 +42,6 @@ describe Packer::Config do
           'region' => 'region1',
           'source_ami' => 'baseami1',
           'instance_type' => 'm4.xlarge',
-          'ami_name' => 'aminame1-region1',
           'vpc_id' => 'vpc1',
           'subnet_id' => 'subnet1',
           'associate_public_ip_address' => true,
@@ -53,12 +51,13 @@ describe Packer::Config do
           'security_group_id' => 'sg1',
           'ami_groups' => 'all'
         )
+        expect(builders[0]['ami_name']).to match(/BOSH-.*-region1/)
       end
     end
 
     describe 'provisioners' do
       it 'returns the expected provisioners' do
-        provisioners = Packer::Config::Aws.new('', '', '', []).provisioners
+        provisioners = Packer::Config::Aws.new('', '', []).provisioners
         expect(provisioners).to eq(
           [
             Packer::Config::Provisioners::AGENT_ZIP,
@@ -101,31 +100,30 @@ describe Packer::Config do
   describe 'Gcp' do
     describe 'builders' do
       it 'returns the expected builders' do
-        builders = Packer::Config::Gcp.new('accountjson',
-                                           'projectid',
-                                           'imageid').builders
-        expect(builders[0]).to eq(
+        account_json = {'project_id' => 'some-project-id'}.to_json
+        builders = Packer::Config::Gcp.new(account_json).builders
+        expect(builders[0]).to include(
           'type' => 'googlecompute',
-          'account_file' => 'accountjson',
-          'project_id' => 'projectid',
+          'account_file' => account_json,
+          'project_id' => 'some-project-id',
           'tags' => ['winrm'],
           'source_image' => 'windows-2012-r2-winrm',
           'image_family' => 'windows-2012-r2',
           'zone' => 'us-east1-c',
           'disk_size' => 50,
-          'image_name' =>  'imageid',
           'machine_type' => 'n1-standard-4',
           'omit_external_ip' => false,
           'communicator' => 'winrm',
           'winrm_username' => 'winrmuser',
           'winrm_use_ssl' => false
         )
+        expect(builders[0]['image_name']).to match(/packer-\d+/)
       end
     end
 
     describe 'provisioners' do
       it 'returns the expected provisioners' do
-        provisioners = Packer::Config::Gcp.new('', '', '').provisioners
+        provisioners = Packer::Config::Gcp.new({}.to_json).provisioners
         expect(provisioners).to eq(
           [
             Packer::Config::Provisioners::WINRM_CONFIG,
