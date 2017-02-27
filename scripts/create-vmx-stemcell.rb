@@ -90,12 +90,13 @@ end
 if find_executable('packer') == nil
   abort("ERROR: cannot find 'packer' on the path")
 end
-if find_executable('tar') == nil
+if find_executable('tar.exe') == nil
   abort("ERROR: cannot find 'tar' on the path")
 end
 
 FileUtils.mkdir_p(VMX_CACHE)
 vmx_filename = File.join(VMX_CACHE,"vmx-v#{INPUT_VMX_VERSION}.tgz")
+puts "Checking for #{vmx_filename}"
 if !File.exist?(vmx_filename)
   S3Client.new().Get(INPUT_BUCKEt,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_filename)
 else
@@ -103,6 +104,7 @@ else
 end
 
 VMX_DIR=File.join(VMX_CACHE,INPUT_VMX_VERSION)
+puts "Checking for #{VMX_DIR}"
 if !Dir.exist?(VMX_DIR)
   FileUtils.mkdir_p(VMX_DIR)
   exec_command("tar.exe -xzvf #{vmx_filename} -C #{VMX_DIR}")
@@ -145,9 +147,4 @@ begin
 
   exec_command("tar czvf #{stemcell_filename} -C #{dir} stemcell.MF image")
   S3Client.new().Put(OUTPUT_BUCKET,File.basename(stemcell_filename),stemcell_filename)
-ensure
-  puts "removing temp directory: #{dir}"
-  if File.exists?(dir)
-    FileUtils.remove_entry dir
-  end
 end
