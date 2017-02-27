@@ -1,5 +1,9 @@
 ---
-platform: windows
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: pivotalgreenhouse/packer-base
 
 inputs:
   - name: version
@@ -13,6 +17,4 @@ outputs:
 params:
   ADMINISTRATOR_PASSWORD: replace-me
 run:
-  path: ruby.exe
-  args:
-  - stemcell-builder/scripts/create-vmx-stemcell.rb
+  path: stemcell-builder/scripts/create-vmx-stemcell.rb
