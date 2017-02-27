@@ -117,6 +117,7 @@ puts "VERSION: #{VERSION}"
 puts "ADMINISTRATOR_PASSWORD: #{ADMINISTRATOR_PASSWORD}"
 puts "BUILDER_PATH: #{BUILDER_PATH}"
 puts "OUTPUT_DIR: #{OUTPUT_DIR}"
+FileUtils.rm_rf(OUTPUT_DIR)
 
 latest_vmx = find_vmx_file(VMX_DIR)
 output_dir = OUTPUT_DIR
