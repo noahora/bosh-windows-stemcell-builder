@@ -17,15 +17,12 @@ ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH=File.expand_path("../..", __FILE__)
 OUTPUT_DIR = File.absolute_path("bosh-windows-stemcell")
 
-Dir.mkdir("vmx")
-S3Client.new().Get("bosh-windows-stemcell-vmx","vmx-v20170224","vmx/vmx.tgz")
-VMX_DIR = File.absolute_path("vmx")
+#S3 inputs
+INPUT_BUCKET= ENV.fetch("VMX_INPUT_BUCKET")
+INPUT_VMX_VERSION= ENV.fetch("INPUT_VMX_VERSION")
+OUTPUT_BUCKET= ENV.fetch("OUTPUT_BUCKET")
+VMX_CACHE= ENV.fetch("VMX_CACHE")
 
-puts "VMX_DIR: #{VMX_DIR}"
-puts "VERSION: #{VERSION}"
-puts "ADMINISTRATOR_PASSWORD: #{ADMINISTRATOR_PASSWORD}"
-puts "BUILDER_PATH: #{BUILDER_PATH}"
-puts "OUTPUT_DIR: #{OUTPUT_DIR}"
 
 def gzip_file(name, output)
   Zlib::GzipWriter.open(output) do |gz|
@@ -97,8 +94,27 @@ if find_executable('tar') == nil
   abort("ERROR: cannot find 'tar' on the path")
 end
 
-vmx_tgz = Dir['vmx/*.tgz'][0]
-exec_command("tar.exe -xzvf #{vmx_tgz} -C vmx")
+FileUtils.mkdir_p(VMX_CACHE)
+vmx_filename = File.join(VMX_CACHE,"vmx-v#{INPUT_VMX_VERSION}.tgz")
+if !File.exist?(vmx_filename)
+  S3Client.new().Get(INPUT_BUCKEt,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_filename)
+else
+  puts "VMX file #{vmx_filename} found in cache."
+end
+
+VMX_DIR=File.join(VMX_CACHE,INPUT_VMX_VERSION)
+if !Dir.exist?(VMX_DIR)
+  FileUtils.mkdir_p(VMX_DIR)
+  exec_command("tar.exe -xzvf #{vmx_filename} -C #{VMX_DIR}")
+else
+  puts "VMX dir #{VMX_DIR} found in cache."
+end
+
+puts "VMX_DIR: #{VMX_DIR}"
+puts "VERSION: #{VERSION}"
+puts "ADMINISTRATOR_PASSWORD: #{ADMINISTRATOR_PASSWORD}"
+puts "BUILDER_PATH: #{BUILDER_PATH}"
+puts "OUTPUT_DIR: #{OUTPUT_DIR}"
 
 latest_vmx = find_vmx_file(VMX_DIR)
 output_dir = OUTPUT_DIR
@@ -128,7 +144,7 @@ begin
   MFTemplate.new("#{BUILDER_PATH}/erb_templates/vsphere/stemcell.MF.erb", VERSION, sha1: image_sha1).save(dir)
 
   exec_command("tar czvf #{stemcell_filename} -C #{dir} stemcell.MF image")
-  S3Client.new().Put("bosh-windows-stemcells-pre-release-candidate",File.basename(stemcell_filename),stemcell_filename)
+  S3Client.new().Put(OUTPUT_BUCKET,File.basename(stemcell_filename),stemcell_filename)
 ensure
   puts "removing temp directory: #{dir}"
   if File.exists?(dir)
