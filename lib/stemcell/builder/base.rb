@@ -17,6 +17,14 @@ module Stemcell
 
       private
 
+        def run_packer
+          packer_artifact = nil
+          Packer::Runner.new(packer_config).run('build', @packer_vars) do |stdout|
+            packer_artifact = parse_packer_output(stdout)
+          end
+          packer_artifact
+        end
+
         def exec_command(cmd)
           `#{cmd}`
           raise "command '#{cmd}' failed" unless $?.success?

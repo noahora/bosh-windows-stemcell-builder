@@ -9,18 +9,7 @@ module Stemcell
       end
 
       def build
-        amis = []
-        Packer::Runner.new(packer_config).run('build', @packer_vars) do |stdout|
-          stdout.each_line do |line|
-            if !(line.include?("secret_key") || line.include?("access_key"))
-              puts line
-            end
-            ami = parse_ami(line)
-            if !ami.nil?
-              amis.push(ami)
-            end
-          end
-        end
+        amis = run_packer
         puts "parsed amis: #{amis}"
         manifest = Manifest::Aws.new(@version, @os, amis).dump
         puts "manifest: #{manifest}"
@@ -31,6 +20,20 @@ module Stemcell
 
         def packer_config
           Packer::Config::Aws.new(@aws_access_key, @aws_secret_key, @amis).dump
+        end
+
+        def parse_packer_output(packer_output)
+          amis = []
+          packer_output.each_line do |line|
+            if !(line.include?("secret_key") || line.include?("access_key"))
+              puts line
+            end
+            ami = parse_ami(line)
+            if !ami.nil?
+              amis.push(ami)
+            end
+          end
+          amis
         end
 
         def parse_ami(line)
