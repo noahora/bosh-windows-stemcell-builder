@@ -18,7 +18,7 @@ BUILDER_PATH=File.expand_path("../..", __FILE__)
 OUTPUT_DIR = File.absolute_path("bosh-windows-stemcell")
 
 #S3 inputs
-INPUT_BUCKET= ENV.fetch("VMX_INPUT_BUCKET")
+INPUT_BUCKET= ENV.fetch("INPUT_BUCKET")
 INPUT_VMX_VERSION= ENV.fetch("INPUT_VMX_VERSION")
 OUTPUT_BUCKET= ENV.fetch("OUTPUT_BUCKET")
 VMX_CACHE= ENV.fetch("VMX_CACHE")
