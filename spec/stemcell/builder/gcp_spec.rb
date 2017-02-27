@@ -21,9 +21,10 @@ describe Stemcell::Builder do
         manifest_contents = 'manifest_contents'
         apply_spec_contents = 'apply_spec_contents'
         packer_vars = {some_var: 'some-value'}
-        image_url = 'some-image-url'
+        image_name = 'some-image-name'
+        image_url = "https://www.googleapis.com/compute/v1/projects/some-project-id/global/images/#{image_name}"
         account_json = {'project_id' => 'some-project-id'}.to_json
-        packer_output = ",artifact,0,id,#{image_url}"
+        packer_output = ",artifact,0,id,#{image_name}"
         source_image = '{"base_image":"some-source-image"}'
 
         packer_config = double(:packer_config)
