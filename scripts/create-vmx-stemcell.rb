@@ -128,6 +128,7 @@ begin
   MFTemplate.new("#{BUILDER_PATH}/erb_templates/vsphere/stemcell.MF.erb", VERSION, sha1: image_sha1).save(dir)
 
   exec_command("tar czvf #{stemcell_filename} -C #{dir} stemcell.MF image")
+  S3Client.new().Put("bosh-windows-stemcells-pre-release-candidate",File.basename(stemcell_filename),stemcell_filename)
 ensure
   puts "removing temp directory: #{dir}"
   if File.exists?(dir)
