@@ -9,7 +9,7 @@ module Stemcell
       end
 
       def build
-        image_url = get_image
+        image_url = run_packer
         manifest = Manifest::Gcp.new(@version, @os, image_url).dump
         super(iaas: 'gcp', is_light: true, image_path: '', manifest: manifest)
       end
@@ -19,22 +19,22 @@ module Stemcell
           Packer::Config::Gcp.new(@account_json, @project_id, @source_image).dump
         end
 
-        def get_image
-          image_url = nil
+        def run_packer
+          image_name = nil
           Packer::Runner.new(packer_config).run('build', @packer_vars) do |stdout|
             stdout.each_line do |line|
               puts line
-              image_url ||= parse_image_url(line)
+              image_name ||= parse_image_name(line)
             end
           end
-          image_url
+          get_image_url(image_name)
         end
 
-        def image_url(image_name)
+        def get_image_url(image_name)
           "https://www.googleapis.com/compute/v1/projects/#{@project_id}/global/images/#{image_name}"
         end
 
-        def parse_image_url(line)
+        def parse_image_name(line)
           if line.include?(",artifact,0,id,")
             return line.split(",").last.chomp
           end
