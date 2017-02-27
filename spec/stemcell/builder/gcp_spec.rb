@@ -22,12 +22,13 @@ describe Stemcell::Builder do
         apply_spec_contents = 'apply_spec_contents'
         packer_vars = {some_var: 'some-value'}
         image_url = 'some-image-url'
-        account_json = 'some-account-json'
+        account_json = {'project_id' => 'some-project-id'}.to_json
         packer_output = ",artifact,0,id,#{image_url}"
+        source_image = '{"base_image":"some-source-image"}'
 
         packer_config = double(:packer_config)
         allow(packer_config).to receive(:dump).and_return(config)
-        allow(Packer::Config::Gcp).to receive(:new).with(account_json).and_return(packer_config)
+        allow(Packer::Config::Gcp).to receive(:new).with(account_json, 'some-project-id', source_image).and_return(packer_config)
 
         packer_runner = double(:packer_runner)
         allow(packer_runner).to receive(:run).with(command, packer_vars).
@@ -57,7 +58,8 @@ describe Stemcell::Builder do
           version: version,
           agent_commit: agent_commit,
           packer_vars: packer_vars,
-          account_json: account_json
+          account_json: account_json,
+          source_image: source_image
         ).build
         expect(stemcell_path).to eq('path-to-stemcell')
       end

@@ -64,9 +64,10 @@ module Packer
     end
 
     class Gcp < Base
-      def initialize(account_json)
+      def initialize(account_json, project_id, source_image)
         @account_json = account_json
-        @project_id = JSON.parse(@account_json)['project_id']
+        @project_id = project_id
+        @source_image = JSON.parse(source_image)['base_image']
       end
 
       def builders
@@ -76,7 +77,7 @@ module Packer
             'account_file' => @account_json,
             'project_id' => @project_id,
             'tags' => ['winrm'],
-            'source_image' => 'windows-2012-r2-winrm',
+            'source_image' => @source_image,
             'image_family' => 'windows-2012-r2',
             'zone' => 'us-east1-c',
             'disk_size' => 50,
@@ -85,7 +86,10 @@ module Packer
             'omit_external_ip' => false,
             'communicator' => 'winrm',
             'winrm_username' => 'winrmuser',
-            'winrm_use_ssl' => false
+            'winrm_use_ssl' => false,
+            'metadata' => {
+              'sysprep-specialize-script-url' => 'https://raw.githubusercontent.com/cloudfoundry-incubator/bosh-windows-stemcell-builder/master/scripts/gcp-setup-winrm.ps1'
+            }
           }
         ]
       end
@@ -201,13 +205,13 @@ module Packer
       AGENT_ZIP = {
         'type' => 'file',
         'source' => 'compiled-agent/agent.zip',
-        'destination' => 'C:\boshagent.zip'
+        'destination' => 'C:\\bosh\\agent.zip'
       }.freeze
 
       AGENT_DEPS_ZIP = {
         'type' => 'file',
         'source' => 'compiled-agent/agent-dependencies.zip',
-        'destination' => 'C:\boshagent-dependencies.zip'
+        'destination' => 'C:\\bosh\\agent-dependencies.zip'
       }.freeze
 
       WINRM_CONFIG = {

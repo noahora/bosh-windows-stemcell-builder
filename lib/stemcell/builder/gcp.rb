@@ -1,8 +1,10 @@
 module Stemcell
   class Builder
     class Gcp < Base
-      def initialize(account_json:, **args)
+      def initialize(account_json:, source_image:, **args)
         @account_json = account_json
+        @project_id = JSON.parse(@account_json)['project_id']
+        @source_image = source_image
         super(args)
       end
 
@@ -14,7 +16,7 @@ module Stemcell
 
       private
         def packer_config
-          Packer::Config::Gcp.new(@account_json).dump
+          Packer::Config::Gcp.new(@account_json, @project_id, @source_image).dump
         end
 
         def get_image
@@ -26,6 +28,10 @@ module Stemcell
             end
           end
           image_url
+        end
+
+        def image_url(image_name)
+          "https://www.googleapis.com/compute/v1/projects/#{@project_id}/global/images/#{image_name}"
         end
 
         def parse_image_url(line)
