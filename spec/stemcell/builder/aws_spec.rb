@@ -18,7 +18,7 @@ describe Stemcell::Builder do
         amis = 'some-amis'
         agent_commit = 'some-agent-commit'
         packer_output = ",artifact,0,id,some-region-id:some-ami-id"
-        parsed_packer_amis = [{region: 'some-region-id', ami_id: 'some-ami-id'}]
+        parsed_packer_amis = [{'region' => 'some-region-id', 'ami_id' => 'some-ami-id'}]
         aws_access_key = 'some-aws-access-key'
         aws_secret_key = 'some-aws-secret-key'
         packer_vars = 'some-packer-vars'

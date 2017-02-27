@@ -99,14 +99,16 @@ describe Packer::Config do
   describe 'Gcp' do
     describe 'builders' do
       it 'returns the expected builders' do
-        account_json = {'project_id' => 'some-project-id'}.to_json
-        builders = Packer::Config::Gcp.new(account_json).builders
+        account_json = 'some-account-json'
+        project_id = 'some-project-id'
+        source_image = {'base_image' => 'some-base-image'}.to_json
+        builders = Packer::Config::Gcp.new(account_json, project_id, source_image).builders
         expect(builders[0]).to include(
           'type' => 'googlecompute',
           'account_file' => account_json,
-          'project_id' => 'some-project-id',
+          'project_id' => project_id,
           'tags' => ['winrm'],
-          'source_image' => 'windows-2012-r2-winrm',
+          'source_image' => 'some-base-image',
           'image_family' => 'windows-2012-r2',
           'zone' => 'us-east1-c',
           'disk_size' => 50,
@@ -114,7 +116,10 @@ describe Packer::Config do
           'omit_external_ip' => false,
           'communicator' => 'winrm',
           'winrm_username' => 'winrmuser',
-          'winrm_use_ssl' => false
+          'winrm_use_ssl' => false,
+          'metadata' => {
+            'sysprep-specialize-script-url' => 'https://raw.githubusercontent.com/cloudfoundry-incubator/bosh-windows-stemcell-builder/master/scripts/gcp-setup-winrm.ps1'
+          }
         )
         expect(builders[0]['image_name']).to match(/packer-\d+/)
       end
@@ -122,7 +127,7 @@ describe Packer::Config do
 
     describe 'provisioners' do
       it 'returns the expected provisioners' do
-        provisioners = Packer::Config::Gcp.new({}.to_json).provisioners
+        provisioners = Packer::Config::Gcp.new({}.to_json, '', {}.to_json).provisioners
         expect(provisioners).to eq(
           [
             Packer::Config::Provisioners::WINRM_CONFIG,

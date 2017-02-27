@@ -39,7 +39,7 @@ module Stemcell
           end
 
           region_id = line.split(",").last.split(":")
-          return {:region=> region_id[0].chomp, :ami_id=> region_id[1].chomp}
+          return {'region'=> region_id[0].chomp, 'ami_id'=> region_id[1].chomp}
         end
     end
   end
