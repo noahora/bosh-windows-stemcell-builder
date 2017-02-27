@@ -1,23 +1,6 @@
 require 'packer/config'
 
 describe Packer::Config do
-  describe 'Base' do
-    describe 'dump' do
-      it 'returns a json string combining the builders and provisioners' do
-        config = Packer::Config::Base.new.dump
-        expect(JSON.parse(config)).to eq(
-          'builders' => [],
-          'provisioners' => [
-            Packer::Config::Provisioners::AGENT_ZIP,
-            Packer::Config::Provisioners::AGENT_DEPS_ZIP,
-            Packer::Config::Provisioners::INSTALL_WINDOWS_FEATURES,
-            Packer::Config::Provisioners::COMMON_POWERSHELL
-          ]
-        )
-      end
-    end
-  end
-
   describe 'Aws' do
     describe 'builders' do
       it 'returns the expected builders' do
@@ -64,7 +47,12 @@ describe Packer::Config do
             Packer::Config::Provisioners::AGENT_DEPS_ZIP,
             Packer::Config::Provisioners::INSTALL_WINDOWS_FEATURES,
             Packer::Config::Provisioners::SET_EC2_PASSWORD,
-            Packer::Config::Provisioners::COMMON_POWERSHELL
+            Packer::Config::Provisioners::SETUP_AGENT,
+            Packer::Config::Provisioners::AWS_AGENT_CONFIG,
+            Packer::Config::Provisioners::CLEANUP_WINDOWS_FEATURES,
+            Packer::Config::Provisioners::DISABLE_SERVICES,
+            Packer::Config::Provisioners::SET_FIREWALL,
+            Packer::Config::Provisioners::CLEANUP_ARTIFACTS
           ]
         )
       end
@@ -134,7 +122,12 @@ describe Packer::Config do
             Packer::Config::Provisioners::AGENT_ZIP,
             Packer::Config::Provisioners::AGENT_DEPS_ZIP,
             Packer::Config::Provisioners::INSTALL_WINDOWS_FEATURES,
-            Packer::Config::Provisioners::COMMON_POWERSHELL
+            Packer::Config::Provisioners::SETUP_AGENT,
+            Packer::Config::Provisioners::GCP_AGENT_CONFIG,
+            Packer::Config::Provisioners::CLEANUP_WINDOWS_FEATURES,
+            Packer::Config::Provisioners::DISABLE_SERVICES,
+            Packer::Config::Provisioners::SET_FIREWALL,
+            Packer::Config::Provisioners::CLEANUP_ARTIFACTS
           ]
         )
       end
@@ -208,20 +201,6 @@ describe Packer::Config do
         provisioners = Packer::Config::VSphere.new('', '', '', '', 1, 1).provisioners
         expect(provisioners).to eq(
           [
-            Packer::Config::Provisioners::WINDOWS_RESTART,
-            Packer::Config::Provisioners::AGENT_ZIP,
-            Packer::Config::Provisioners::AGENT_DEPS_ZIP,
-            Packer::Config::Provisioners::INSTALL_WINDOWS_FEATURES,
-            Packer::Config::Provisioners::LGPO_EXE,
-            Packer::Config::Provisioners::VMWARE_TOOLS_EXE,
-            Packer::Config::Provisioners::INSTALL_VMWARE_TOOLS,
-            Packer::Config::Provisioners::ENABLE_RDP,
-            Packer::Config::Provisioners::DISABLE_AUTO_LOGON,
-            Packer::Config::Provisioners::ADD_VCAP_GROUP,
-            Packer::Config::Provisioners::RUN_LGPO,
-            Packer::Config::Provisioners::COMMON_POWERSHELL,
-            Packer::Config::Provisioners::CLEANUP_TEMP_DIRS,
-            Packer::Config::Provisioners::COMPACT_DISK
           ]
         )
       end
