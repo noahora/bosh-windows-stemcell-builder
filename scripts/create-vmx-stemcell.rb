@@ -7,16 +7,16 @@ require 'scanf.rb'
 require 'tmpdir'
 require 'open3'
 require 'mkmf'
-
 require_relative '../erb_templates/templates.rb'
 
 # Concourse inputs
 VERSION = File.read("version/number").chomp
-VMX_DIR = File.absolute_path("vmx")
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH=File.expand_path("../..", __FILE__)
 OUTPUT_DIR = File.absolute_path("bosh-windows-stemcell")
 
+Dir.mkdir("vmx")
+VMX_DIR = File.absolute_path("vmx")
 
 puts "VMX_DIR: #{VMX_DIR}"
 puts "VERSION: #{VERSION}"
@@ -101,6 +101,9 @@ end
 if find_executable('tar') == nil
   abort("ERROR: cannot find 'tar' on the path")
 end
+
+vmx_tgz = Dir['vsphere-stemcell-vmx/*.tgz'][0]
+exec_command("tar.exe -xzvf #{vmx_tgz} -C vmx")
 
 latest_vmx = find_vmx_file(VMX_DIR)
 output_dir = OUTPUT_DIR
