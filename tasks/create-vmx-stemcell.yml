@@ -17,7 +17,7 @@ params:
   ADMINISTRATOR_PASSWORD: replace-me
 
   INPUT_BUCKET: "bosh-windows-stemcell-vmx"
-  INPUT_VMX_VERSION:
+  INPUT_VMX_VERSION: 20170224
   OUTPUT_BUCKET: "bosh-windows-stemcells-pre-release-candidate"
   VMX_CACHE: "C:\\vmx-data"
 
