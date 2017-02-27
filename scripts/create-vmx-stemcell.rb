@@ -8,6 +8,8 @@ require 'tmpdir'
 require 'open3'
 require 'mkmf'
 require_relative '../erb_templates/templates.rb'
+require_relative './s3-client.rb'
+
 
 # Concourse inputs
 VERSION = File.read("version/number").chomp
@@ -16,6 +18,7 @@ BUILDER_PATH=File.expand_path("../..", __FILE__)
 OUTPUT_DIR = File.absolute_path("bosh-windows-stemcell")
 
 Dir.mkdir("vmx")
+S3Client.new().Get("bosh-windows-stemcell-vmx","vmx-v20170224","vmx/vmx.tgz")
 VMX_DIR = File.absolute_path("vmx")
 
 puts "VMX_DIR: #{VMX_DIR}"
@@ -83,14 +86,6 @@ def find_vmx_file(dir)
   return files[0]
 end
 
-def install_ovftool
-  ovftoolBundle = "windows-stemcell-dependencies/ovftool/VMware-ovftool.bundle"
-  File.chmod(0777, ovftoolBundle)
-  exec_command("#{ovftoolBundle} --required --eulas-agreed")
-end
-
-install_ovftool
-
 if find_executable('ovftool') == nil
   abort("ERROR: cannot find 'ovftool' on the path")
 end
@@ -102,7 +97,7 @@ if find_executable('tar') == nil
   abort("ERROR: cannot find 'tar' on the path")
 end
 
-vmx_tgz = Dir['vsphere-stemcell-vmx/*.tgz'][0]
+vmx_tgz = Dir['vmx/*.tgz'][0]
 exec_command("tar.exe -xzvf #{vmx_tgz} -C vmx")
 
 latest_vmx = find_vmx_file(VMX_DIR)
