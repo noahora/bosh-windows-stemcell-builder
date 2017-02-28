@@ -15,7 +15,7 @@ VMX_CACHE= ENV.fetch("VMX_CACHE")
 
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH = File.expand_path("../..", __FILE__)
-OUTPUT_DIR = File.expand_path(FileUtils.mkdir_p("./vmx-output").first)
+OUTPUT_DIR = File.join(BUILDER_PATH, "vmx-output")
 
 puts "ADMINISTRATOR_PASSWORD: #{ADMINISTRATOR_PASSWORD}"
 puts "BUILDER_PATH: #{BUILDER_PATH}"
