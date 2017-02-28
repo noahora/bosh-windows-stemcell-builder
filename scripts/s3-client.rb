@@ -4,6 +4,7 @@ class S3Client
   def initialize()
     Aws.use_bundled_cert!
     @s3 = Aws::S3::Client.new
+    @s3_resource = Aws::S3::Resource.new
   end
 
   def Get(bucket,key,file_name)
@@ -15,9 +16,7 @@ class S3Client
   end
   def Put(bucket,key,file_name)
     puts "Uploading the #{file_name} to #{bucket}:#{key}"
-    File.open(file_name, 'rb') do |file|
-      @s3.put_object({ bucket:bucket , key:key, body: file })
-    end
+    @s3_resource.bucket(bucket).object(key).upload_file(file_name)
     puts "Finished uploading the #{file_name} to #{bucket}:#{key}"
   end
 end
