@@ -9,8 +9,8 @@ require_relative './s3-client.rb'
 
 #S3 inputs
 VMX_BUCKET = ENV.fetch("INPUT_BUCKET")
-INPUT_VMX_VERSION= File.read("version/number").chomp
-INPUT_VMX_VERSION = INPUT_VMX_VERSION.scan(/(\d+)\./).flatten.first
+raw_version = File.read("version/number").chomp
+INPUT_VMX_VERSION = raw_version.scan(/(\d+)\./).flatten.first
 VMX_CACHE= ENV.fetch("VMX_CACHE")
 
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
@@ -53,6 +53,18 @@ def find_vmx_file(dir)
     raise "Too many vmx files in directory: #{files}"
   end
   return files[0]
+end
+
+def exec_command(cmd)
+  Open3.popen2(cmd) do |stdin, out, wait_thr|
+    out.each_line do |line|
+      puts line
+    end
+    exit_status = wait_thr.value
+    if exit_status != 0
+      raise "error running command: #{cmd}"
+    end
+  end
 end
 
 FileUtils.mkdir_p(VMX_CACHE)
