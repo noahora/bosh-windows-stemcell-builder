@@ -22,9 +22,7 @@ module Packer
         args_combined += "-var \"#{name}=#{value}\""
       end
 
-      packer_command = "packer #{command} -machine-readable #{args_combined} #{config_file.path}"
-      puts packer_command
-      `cat #{config_file.path}`
+      packer_command = "packer #{command} -on-error abort -machine-readable #{args_combined} #{config_file.path}"
 
       Open3.popen3(packer_command) do |stdin, stdout, stderr, wait_thr|
         yield(stdout) if block_given?

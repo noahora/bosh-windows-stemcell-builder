@@ -10,9 +10,7 @@ module Stemcell
 
       def build
         amis = run_packer
-        puts "parsed amis: #{amis}"
         manifest = Manifest::Aws.new(@version, @os, amis).dump
-        puts "manifest: #{manifest}"
         super(iaas: 'aws', is_light: true, image_path: '', manifest: manifest)
       end
 
