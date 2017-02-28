@@ -1,27 +1,25 @@
 #!/usr/bin/env ruby
 
-require 'digest'
-require 'fileutils'
-require 'zlib'
-require 'scanf.rb'
-require 'tmpdir'
 require 'open3'
+require 'tmpdir'
+require 'scanf.rb'
+require 'fileutils'
+require_relative './s3-client.rb'
+require 'digest'
+require 'zlib'
 require 'mkmf'
 require_relative '../erb_templates/templates.rb'
-require_relative './s3-client.rb'
 
 
 # Concourse inputs
-VERSION = File.read("version/number").chomp
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
-BUILDER_PATH=File.expand_path("../..", __FILE__)
+BUILDER_PATH = File.expand_path("../..", __FILE__)
 OUTPUT_DIR = File.absolute_path("bosh-windows-stemcell")
 
-#S3 inputs
-INPUT_BUCKET= ENV.fetch("INPUT_BUCKET")
-INPUT_VMX_VERSION= ENV.fetch("INPUT_VMX_VERSION")
-OUTPUT_BUCKET= ENV.fetch("OUTPUT_BUCKET")
-VMX_CACHE= ENV.fetch("VMX_CACHE")
+INPUT_VMX_VERSION = ENV.fetch("INPUT_VMX_VERSION")
+VMX_CACHE = ENV.fetch("VMX_CACHE")
+VERSION = File.read("version/number").chomp
+OUTPUT_BUCKET = ENV.fetch("OUTPUT_BUCKET")
 
 
 def gzip_file(name, output)
@@ -94,34 +92,33 @@ if find_executable('tar.exe') == nil
   abort("ERROR: cannot find 'tar' on the path")
 end
 
+# Find the vmx tarball matching version, download if not cached
 FileUtils.mkdir_p(VMX_CACHE)
-vmx_filename = File.join(VMX_CACHE,"vmx-v#{INPUT_VMX_VERSION}.tgz")
-puts "Checking for #{vmx_filename}"
-if !File.exist?(vmx_filename)
-  S3Client.new().Get(INPUT_BUCKEt,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_filename)
+vmx_tarball = File.join(VMX_CACHE,"vmx-v#{INPUT_VMX_VERSION}.tgz")
+puts "Checking for #{vmx_tarball}"
+if !File.exist?(vmx_tarball)
+  S3Client.new().Get(INPUT_BUCKEt,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_tarball)
 else
-  puts "VMX file #{vmx_filename} found in cache."
+  puts "VMX file #{vmx_tarball} found in cache."
 end
 
+# Find the vmx directory matching version, untar if not cached
 VMX_DIR=File.join(VMX_CACHE,INPUT_VMX_VERSION)
 puts "Checking for #{VMX_DIR}"
 if !Dir.exist?(VMX_DIR)
   FileUtils.mkdir_p(VMX_DIR)
-  exec_command("tar.exe -xzvf #{vmx_filename} -C #{VMX_DIR}")
+  exec_command("tar.exe -xzvf #{vmx_tarball} -C #{VMX_DIR}")
 else
   puts "VMX dir #{VMX_DIR} found in cache."
 end
 
-puts "VMX_DIR: #{VMX_DIR}"
-puts "VERSION: #{VERSION}"
-puts "ADMINISTRATOR_PASSWORD: #{ADMINISTRATOR_PASSWORD}"
-puts "BUILDER_PATH: #{BUILDER_PATH}"
-puts "OUTPUT_DIR: #{OUTPUT_DIR}"
-FileUtils.rm_rf(OUTPUT_DIR)
-
 latest_vmx = find_vmx_file(VMX_DIR)
+puts "latest vmx file: #{latest_vmx}"
+
+FileUtils.rm_rf(OUTPUT_DIR) # packer will fail if the output directory exists already
 output_dir = OUTPUT_DIR
 stemcell_filename = File.join(output_dir, "bosh-stemcell-#{VERSION}-vsphere-esxi-windows2012R2-go_agent.tgz")
+puts "output directory: #{OUTPUT_DIR}"
 
 begin
   stemcell_vars = {
@@ -149,6 +146,8 @@ begin
   image_sha1 = Digest::SHA1.file(image_file).hexdigest
   MFTemplate.new("#{BUILDER_PATH}/erb_templates/vsphere/stemcell.MF.erb", VERSION, sha1: image_sha1).save(output_dir)
 
+
+
   exec_command("tar czvf #{stemcell_filename} -C #{output_dir} stemcell.MF image")
-  S3Client.new().Put(OUTPUT_BUCKET,File.basename(stemcell_filename),stemcell_filename)
+  S3Client.new().Put(OUTPUT_BUCKET, File.basename(stemcell_filename), stemcell_filename)
 end
