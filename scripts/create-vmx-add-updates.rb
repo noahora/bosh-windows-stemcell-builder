@@ -10,6 +10,7 @@ require_relative './s3-client.rb'
 #S3 inputs
 VMX_BUCKET = ENV.fetch("INPUT_BUCKET")
 INPUT_VMX_VERSION= File.read("version/number").chomp
+INPUT_VMX_VERSION = INPUT_VMX_VERSION.scan(/(\d+)\./).flatten.first
 VMX_CACHE= ENV.fetch("VMX_CACHE")
 
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
