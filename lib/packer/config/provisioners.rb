@@ -42,7 +42,7 @@ module Packer
 
       COMPACT_DISK = {
         'type' => 'powershell',
-        'scripts' => ['../scripts/compact.ps1']
+        'scripts' => ['scripts/compact.ps1']
       }.freeze
 
       DISABLE_AUTO_LOGON = {
@@ -62,7 +62,7 @@ module Packer
 
       GCP_AGENT_CONFIG = {
         'type' => 'powershell',
-        'scripts' => ['gcp/scripts/agent_config.ps1']
+        'scripts' => ['scripts/gcp/agent_config.ps1']
       }.freeze
 
       INSTALL_VMWARE_TOOLS = {
@@ -109,7 +109,7 @@ module Packer
 
       VSPHERE_AGENT_CONFIG = {
         'type' => 'powershell',
-        'scripts' => ['vsphere/scripts/agent_config.ps1']
+        'scripts' => ['scripts/vsphere/agent_config.ps1']
       }.freeze
 
       WINRM_CONFIG = {

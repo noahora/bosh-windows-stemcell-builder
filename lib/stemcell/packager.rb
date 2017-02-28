@@ -22,8 +22,7 @@ module Stemcell
       packaged_image
     end
 
-    def self.package(iaas:, os:, is_light:, version:, image_path:, manifest:,
-                     apply_spec:, output_dir:)
+    def self.package(iaas:, os:, is_light:, version:, image_path:, manifest:, apply_spec:, output_dir:)
       raise InvalidImagePathError unless File.file?(image_path) || is_light
       raise InvalidOutputDirError unless File.directory?(output_dir)
 
