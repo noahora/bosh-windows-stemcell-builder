@@ -22,7 +22,7 @@
       "ssh_username": "Administrator",
       "winrm_username": "Administrator",
       "winrm_password": "{{user `administrator_password`}}",
-      "winrm_timeout": "2m",
+      "winrm_timeout": "4m",
       "winrm_insecure": true,
 
       "vmx_data": {
