@@ -4,12 +4,18 @@ require 'open3'
 require 'tmpdir'
 require 'scanf.rb'
 require 'fileutils'
+require_relative './s3-client.rb'
 
-VMX_DIR = ENV.fetch("VMX_DIR")
+
+#S3 inputs
+VMX_BUCKET = ENV.fetch("INPUT_BUCKET")
+INPUT_VMX_VERSION= File.read("version/number").chomp
+VMX_CACHE= ENV.fetch("VMX_CACHE")
+
 ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH = File.expand_path("../..", __FILE__)
+OUTPUT_DIR = File.expand_path(FileUtils.mkdir_p("./vmx-output").first)
 
-puts "VMX_DIR: #{VMX_DIR}"
 puts "ADMINISTRATOR_PASSWORD: #{ADMINISTRATOR_PASSWORD}"
 puts "BUILDER_PATH: #{BUILDER_PATH}"
 
@@ -36,33 +42,6 @@ def packer_command(command, config_path, vars)
   end
 end
 
-def find_latest_vmx_dir(parent_dir)
-  latest_version = -1
-  latest_dirname = nil
-  pattern = File.join(parent_dir, '**/base-vmx-*').gsub('\\', '/')
-
-  Dir.glob(pattern) do |dirname|
-    puts "dirname: #{dirname}"
-
-    base = File.basename(dirname)
-    puts "base: #{base}"
-
-    version = base.scanf("base-vmx-%d")[0]
-    if version
-      version_number = version.to_i
-      if version_number > latest_version
-        latest_version = version_number
-        latest_dirname = dirname
-      end
-    end
-  end
-
-  if latest_version == -1
-    raise "Failed to find any vmx dirs in: #{parent_dir}"
-  end
-  return latest_dirname, latest_version
-end
-
 def find_vmx_file(dir)
   pattern = File.join(dir, "*.vmx").gsub('\\', '/')
   files = Dir.glob(pattern)
@@ -75,47 +54,49 @@ def find_vmx_file(dir)
   return files[0]
 end
 
-def tmpdir_name
-  path = File.join(Dir.tmpdir(), "packer-#{Time.now.to_i}")
-  n = 0
-  while File.exists?(path) && n < 100
-    path = File.join(Dir.tmpdir(), "packer-#{Time.now.to_i}-#{n}")
-    n += 1
-  end
-  if n == 100
-    raise "Error finding unique name for tmpdir!"
-  end
-  return File.absolute_path(path)
+FileUtils.mkdir_p(VMX_CACHE)
+vmx_tarball = File.join(VMX_CACHE,"vmx-v#{INPUT_VMX_VERSION}.tgz")
+puts "Checking for #{vmx_tarball}"
+if !File.exist?(vmx_tarball)
+  S3Client.new().Get(INPUT_BUCKEt,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_tarball)
+else
+  puts "VMX file #{vmx_tarball} found in cache."
 end
 
-latest_dirname, latest_version = find_latest_vmx_dir(VMX_DIR)
-puts "latest vmx directory: #{latest_dirname}"
-puts "latest vmx version: #{latest_version}"
+VMX_DIR=File.join(VMX_CACHE,INPUT_VMX_VERSION)
+puts "Checking for #{VMX_DIR}"
+if !Dir.exist?(VMX_DIR)
+  FileUtils.mkdir_p(VMX_DIR)
+  exec_command("tar.exe -xzvf #{vmx_tarball} -C #{VMX_DIR}")
+else
+  puts "VMX dir #{VMX_DIR} found in cache."
+end
 
-latest_vmx = find_vmx_file(latest_dirname)
+latest_vmx = find_vmx_file(VMX_DIR)
 puts "latest vmx file: #{latest_vmx}"
 
-new_dirname = File.join(VMX_DIR, "base-vmx-#{latest_version+1}")
+new_dirname = File.join(VMX_CACHE, "#{INPUT_VMX_VERSION.to_i+1}")
 puts "new vmx directory: #{new_dirname}"
 
-dir = tmpdir_name()
-puts "temporary directory: #{dir}"
+puts "output directory: #{OUTPUT_DIR}"
 
 begin
   update_vars = {
     'source_path' => latest_vmx,
-    'output_directory' => dir,
+    'output_directory' => OUTPUT_DIR,
     'administrator_password' => ADMINISTRATOR_PASSWORD
   }
 
   packer_config = File.join(BUILDER_PATH, "vmx", "updates.json")
   packer_command('build', packer_config, update_vars)
 
-  puts "moving dir (#{dir}) to (#{new_dirname})"
-  FileUtils.mv(dir, new_dirname)
-ensure
-  puts "removing temp directory: #{dir}"
-  if File.exists?(dir)
-    FileUtils.remove_entry dir
-  end
+  puts "tarballing VMX dir #{OUTPUT_DIR}..."
+  new_vmx_tarball = "vmx-v#{INPUT_VMX_VERSION.to_i+1}.tgz"
+  exec_command("tar czvf #{new_vmx_tarball} -C #{OUTPUT_DIR} *")
+  S3Client.new().Put(VMX_BUCKET, File.basename(new_vmx_tarball),new_vmx_tarball)
+
+  puts "moving VMX tarball #{OUTPUT_DIR}/#{new_vmx_tarball} to #{VMX_CACHE}/#{new_vmx_tarball}"
+  FileUtils.mv("#{OUTPUT_DIR}/#{new_vmx_tarball}", "#{VMX_CACHE}/#{new_vmx_tarball}")
+  puts "moving dir (#{OUTPUT_DIR}) to (#{new_dirname})"
+  FileUtils.mv(OUTPUT_DIR, new_dirname)
 end
