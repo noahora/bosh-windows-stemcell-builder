@@ -65,12 +65,12 @@ def find_vmx_file(dir)
   return files[0]
 end
 
-if find_executable('packer') == nil
-  abort("ERROR: cannot find 'packer' on the path")
-end
-if find_executable('tar.exe') == nil
-  abort("ERROR: cannot find 'tar' on the path")
-end
+# if find_executable('packer') == nil
+#   abort("ERROR: cannot find 'packer' on the path")
+# end
+# if find_executable('tar.exe') == nil
+#   abort("ERROR: cannot find 'tar' on the path")
+# end
 
 # Find the vmx tarball matching version, download if not cached
 FileUtils.mkdir_p(VMX_CACHE)
