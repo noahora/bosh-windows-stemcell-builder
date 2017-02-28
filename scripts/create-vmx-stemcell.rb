@@ -130,22 +130,25 @@ begin
     'administrator_password' => ADMINISTRATOR_PASSWORD
   }
 
+  puts "Starting Packer"
   packer_config = File.join(BUILDER_PATH, "vmx", "stemcell.json")
   packer_command('build', packer_config, stemcell_vars)
 
-  stemcell_vmx = find_vmx_file(dir)
+  stemcell_vmx = find_vmx_file(output_dir)
   puts "new stemcell_vmx: #{stemcell_vmx}"
 
   ova_file = File.join(output_dir, 'image.ova')
+  puts "Running ovftool"
   exec_command("ovftool #{stemcell_vmx} #{ova_file}")
 
-  image_file = File.join(dir, 'image')
+  image_file = File.join(output_dir, 'image')
   puts "image_file: #{image_file}"
 
+  puts "Gzip OVA file"
   gzip_file(ova_file, image_file)
   image_sha1 = Digest::SHA1.file(image_file).hexdigest
-  MFTemplate.new("#{BUILDER_PATH}/erb_templates/vsphere/stemcell.MF.erb", VERSION, sha1: image_sha1).save(dir)
+  MFTemplate.new("#{BUILDER_PATH}/erb_templates/vsphere/stemcell.MF.erb", VERSION, sha1: image_sha1).save(output_dir)
 
-  exec_command("tar czvf #{stemcell_filename} -C #{dir} stemcell.MF image")
+  exec_command("tar czvf #{stemcell_filename} -C #{output_dir} stemcell.MF image")
   S3Client.new().Put(OUTPUT_BUCKET,File.basename(stemcell_filename),stemcell_filename)
 end
