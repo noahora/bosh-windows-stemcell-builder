@@ -78,7 +78,7 @@ FileUtils.mkdir_p(VMX_CACHE)
 vmx_tarball = File.join(VMX_CACHE,"vmx-v#{INPUT_VMX_VERSION}.tgz")
 puts "Checking for #{vmx_tarball}"
 if !File.exist?(vmx_tarball)
-  S3Client.new().Get(INPUT_BUCKEt,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_tarball)
+  S3Client.new().Get(INPUT_BUCKET,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_tarball)
 else
   puts "VMX file #{vmx_tarball} found in cache."
 end
