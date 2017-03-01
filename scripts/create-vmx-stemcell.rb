@@ -5,9 +5,9 @@ require 'tmpdir'
 require 'scanf.rb'
 require 'fileutils'
 require_relative './s3-client.rb'
+require 'mkmf'
 require 'digest'
 require 'zlib'
-require 'mkmf'
 require_relative '../erb_templates/templates.rb'
 
 
@@ -16,7 +16,10 @@ ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH = File.expand_path("../..", __FILE__)
 OUTPUT_DIR = File.absolute_path("bosh-windows-stemcell")
 
-INPUT_VMX_VERSION = ENV.fetch("INPUT_VMX_VERSION")
+raw_version = File.read("vmx-version/number").chomp
+INPUT_VMX_VERSION = raw_version.scan(/(\d+)\./).flatten.first
+
+VMX_BUCKET = ENV.fetch("INPUT_BUCKET")
 VMX_CACHE = ENV.fetch("VMX_CACHE")
 VERSION = File.read("version/number").chomp
 OUTPUT_BUCKET = ENV.fetch("OUTPUT_BUCKET")
@@ -81,15 +84,14 @@ def find_vmx_file(dir)
   return files[0]
 end
 
-if find_executable('ovftool') == nil
-  abort("ERROR: cannot find 'ovftool' on the path")
-end
-
 if find_executable('packer') == nil
   abort("ERROR: cannot find 'packer' on the path")
 end
 if find_executable('tar.exe') == nil
   abort("ERROR: cannot find 'tar' on the path")
+end
+if find_executable('ovftool') == nil
+  abort("ERROR: cannot find 'ovftool' on the path")
 end
 
 # Find the vmx tarball matching version, download if not cached
@@ -97,7 +99,7 @@ FileUtils.mkdir_p(VMX_CACHE)
 vmx_tarball = File.join(VMX_CACHE,"vmx-v#{INPUT_VMX_VERSION}.tgz")
 puts "Checking for #{vmx_tarball}"
 if !File.exist?(vmx_tarball)
-  S3Client.new().Get(INPUT_BUCKEt,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_tarball)
+  S3Client.new().Get(VMX_BUCKET,"vmx-v#{INPUT_VMX_VERSION}.tgz",vmx_tarball)
 else
   puts "VMX file #{vmx_tarball} found in cache."
 end

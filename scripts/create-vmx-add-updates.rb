@@ -5,6 +5,7 @@ require 'tmpdir'
 require 'scanf.rb'
 require 'fileutils'
 require_relative './s3-client.rb'
+require 'mkmf'
 
 
 # Concourse inputs
@@ -12,7 +13,7 @@ ADMINISTRATOR_PASSWORD = ENV.fetch('ADMINISTRATOR_PASSWORD')
 BUILDER_PATH = File.expand_path("../..", __FILE__)
 OUTPUT_DIR = File.join(BUILDER_PATH, "vmx-output")
 
-raw_version = File.read("version/number").chomp
+raw_version = File.read("vmx-version/number").chomp
 INPUT_VMX_VERSION = raw_version.scan(/(\d+)\./).flatten.first
 
 VMX_BUCKET = ENV.fetch("INPUT_BUCKET")
@@ -65,12 +66,12 @@ def find_vmx_file(dir)
   return files[0]
 end
 
-# if find_executable('packer') == nil
-#   abort("ERROR: cannot find 'packer' on the path")
-# end
-# if find_executable('tar.exe') == nil
-#   abort("ERROR: cannot find 'tar' on the path")
-# end
+if find_executable('packer') == nil
+  abort("ERROR: cannot find 'packer' on the path")
+end
+if find_executable('tar.exe') == nil
+  abort("ERROR: cannot find 'tar' on the path")
+end
 
 # Find the vmx tarball matching version, download if not cached
 FileUtils.mkdir_p(VMX_CACHE)
