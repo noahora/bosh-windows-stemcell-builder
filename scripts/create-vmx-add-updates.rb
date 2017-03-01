@@ -116,10 +116,9 @@ begin
   exec_command("tar czvf #{new_vmx_tarball} -C #{OUTPUT_DIR} *")
   S3Client.new().Put(VMX_BUCKET, File.basename(new_vmx_tarball), new_vmx_tarball)
 
-  source_tarball = File.join(OUTPUT_DIR, new_vmx_tarball)
-  dest_tarball = File.join(VMX_CACHE, new_vmx_tarball)
-  puts "moving VMX tarball #{source_tarball} to #{dest_tarball}"
-  FileUtils.mv("#{source_tarball}", "#{dest_tarball}")
+  cached_tarball = File.join(VMX_CACHE, new_vmx_tarball)
+  puts "moving VMX tarball #{new_vmx_tarball} to #{cached_tarball}"
+  FileUtils.mv("#{new_vmx_tarball}", "#{cached_tarball}")
   puts "moving dir (#{OUTPUT_DIR}) to (#{new_dirname})"
   FileUtils.mv(OUTPUT_DIR, new_dirname)
 end
