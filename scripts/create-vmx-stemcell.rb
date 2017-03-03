@@ -143,6 +143,17 @@ begin
   image_file = File.join(output_dir, 'image')
   puts "image_file: #{image_file}"
 
+  Dir.mktmpdir do |dir|
+  exec_command("tar xf #{ova_file} -C #{dir}")
+  f = Nokogiri::XML(File.open("#{dir}/packer-vmware-iso.ovf"))
+  f.css("VirtualHardwareSection Item").select {|x| x.to_s =~ /ethernet/}.first.remove
+  File.write("#{dir}/image.ovf", f.to_s)
+  ova_file_path = File.absolute_path(ova_file)
+  Dir.chdir(dir) do
+    exec_command("tar cf #{ova_file_path} *")
+  end
+  end
+
   puts "Gzip OVA file"
   gzip_file(ova_file, image_file)
   image_sha1 = Digest::SHA1.file(image_file).hexdigest
