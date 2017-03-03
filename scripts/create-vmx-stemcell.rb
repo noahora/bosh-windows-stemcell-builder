@@ -145,17 +145,19 @@ begin
   puts "OVA file path: #{ova_file_path}"
 
   Dir.mktmpdir do |dir|
-  exec_command("tar xf #{ova_file_path} -C #{dir}")
-  puts "#{dir} with ova file"
-  f = Nokogiri::XML(File.open(File.join(dir,"image.ovf")))
-  f.css("VirtualHardwareSection Item").select {|x| x.to_s =~ /ethernet/}.first.remove
-  puts "Writing OVF file "
-  File.write(File.join(dir,"image.ovf"), f.to_s)
-  puts "Wrote OVF file"
-  Dir.chdir(dir) do
-    exec_command("tar cf #{ova_file_path} *")
-  end
-  puts "Removed ethernet"
+    exec_command("tar xf #{ova_file_path} -C #{dir}")
+    puts "#{dir} with ova file"
+    file = File.open(File.join(dir,"image.ovf"))
+    f = Nokogiri::XML(file)
+    f.css("VirtualHardwareSection Item").select {|x| x.to_s =~ /ethernet/}.first.remove
+    puts "Writing OVF file "
+    File.write(File.join(dir,"image.ovf"), f.to_s)
+    file.close
+    puts "Wrote OVF file"
+    Dir.chdir(dir) do
+      exec_command("tar cf #{ova_file_path} *")
+    end
+    puts "Removed ethernet"
   end
 
   image_file = File.join(output_dir, 'image')
