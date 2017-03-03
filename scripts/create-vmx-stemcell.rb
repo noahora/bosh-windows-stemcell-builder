@@ -152,10 +152,13 @@ begin
   f.css("VirtualHardwareSection Item").select {|x| x.to_s =~ /ethernet/}.first.remove
   puts "Writing OVF file "
   File.write(File.join(dir,"image.ovf"), f.to_s)
+  puts "Wrote OVF file"
   ova_file_path = File.absolute_path(ova_file)
+  puts "OVA file path: #{ova_file_path}"
   Dir.chdir(dir) do
     exec_command("tar cf #{ova_file_path} *")
   end
+  puts "Removed ethernet"
   end
 
   puts "Gzip OVA file"
