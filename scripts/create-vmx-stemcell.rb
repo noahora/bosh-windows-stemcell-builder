@@ -25,6 +25,9 @@ VMX_CACHE = ENV.fetch("VMX_CACHE")
 VERSION = File.read("version/number").chomp
 OUTPUT_BUCKET = ENV.fetch("OUTPUT_BUCKET")
 
+PRODUCT_KEY = ENV.fetch('PRODUCT_KEY')
+OWNER = ENV.fetch('OWNER')
+ORGANIZATION = ENV.fetch('ORGANIZATION')
 
 def gzip_file(name, output)
   Zlib::GzipWriter.open(output) do |gz|
@@ -57,6 +60,9 @@ def packer_command(command, config_path, vars)
       -var "source_path=#{vars['source_path']}" \
       -var "administrator_password=#{vars['administrator_password']}" \
       -var "output_directory=#{vars['output_directory']}" \
+      -var "product_key=#{PRODUCT_KEY}" \
+      -var "owner=#{OWNER}" \
+      -var "organization=#{ORGANIZATION}" \
       #{config_path}
     }
 

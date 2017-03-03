@@ -4,7 +4,11 @@
     "administrator_password": null,
     "output_directory": null,
     "memsize": "4096",
-    "numvcpus": "4"
+    "numvcpus": "4",
+
+    "product_key": null,
+    "owner": null,
+    "organization": null
   },
   "builders": [
     {
@@ -15,7 +19,7 @@
       "headless": false,
       "boot_wait": "2m",
 
-      "shutdown_command": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File C:\\sysprep.ps1 -NewPassword {{user `administrator_password`}}",
+      "shutdown_command": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File a:\\sysprep.ps1 -NewPassword {{user `administrator_password`}} -ProductKey {{user `product_key`}} -Owner {{user `owner`}} -Organization {{user `organization`}}",
       "shutdown_timeout": "1h",
 
       "communicator": "winrm",
