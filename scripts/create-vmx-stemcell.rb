@@ -8,6 +8,7 @@ require_relative './s3-client.rb'
 require 'mkmf'
 require 'digest'
 require 'zlib'
+require 'nokogiri'
 require_relative '../erb_templates/templates.rb'
 
 
@@ -143,14 +144,14 @@ begin
   image_file = File.join(output_dir, 'image')
   puts "image_file: #{image_file}"
 
-  exec_command("gem install nokogiri")
-  require 'nokogiri'
 
   Dir.mktmpdir do |dir|
   exec_command("tar xf #{ova_file} -C #{dir}")
-  f = Nokogiri::XML(File.open("#{dir}/packer-vmware-iso.ovf"))
+  puts "#{dir} with ova file"
+  f = Nokogiri::XML(File.open(File.join(dir,"image.ovf")))
   f.css("VirtualHardwareSection Item").select {|x| x.to_s =~ /ethernet/}.first.remove
-  File.write("#{dir}/image.ovf", f.to_s)
+  puts "Writing OVF file "
+  File.write(File.join(dir,"image.ovf"), f.to_s)
   ova_file_path = File.absolute_path(ova_file)
   Dir.chdir(dir) do
     exec_command("tar cf #{ova_file_path} *")
