@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+OUTPUT_DIR = ENV.fetch("OUTPUT_DIR")
+Dir.chdir(OUTPUT_DIR) do
+  File.write("file.vmx", "banana")
+end

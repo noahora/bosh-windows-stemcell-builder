@@ -2,7 +2,7 @@ require 'rspec/core/rake_task'
 require_relative 'lib/stemcell/builder'
 import 'lib/tasks/build/aws.rake'
 import 'lib/tasks/build/gcp.rake'
-import 'lib/tasks/build/vsphere-vmx.rake'
+import 'lib/tasks/build/vsphere.rake'
 
 namespace :build do
   task :azure do
@@ -11,5 +11,13 @@ namespace :build do
 
   task :openstack do
     puts 'build:openstack'
+  end
+
+  task :gcp do
+    puts 'build:gcp'
+  end
+
+  task :vsphere do
+    puts 'build:vsphere'
   end
 end

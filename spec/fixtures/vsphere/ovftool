@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+
+OUTPUT_DIR = ENV.fetch("OUTPUT_DIR")
+FileUtils.cp(File.join(__dir__, "image"), File.join(OUTPUT_DIR, "image"))

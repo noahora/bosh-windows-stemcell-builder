@@ -3,12 +3,15 @@ require 'securerandom'
 module Packer
   module Config
     class VSphereBase < Base
-      def initialize(admin_password, source_path, output_directory, mem_size, num_vcpus)
-        @admin_password = admin_password
+      def initialize(administrator_password, source_path, output_directory, memsize, numvcpus, product_key, owner, organization)
+        @administrator_password = administrator_password
         @source_path = source_path
         @output_directory = output_directory
-        @mem_size = mem_size
-        @num_vcpus = num_vcpus
+        @mem_size = memsize
+        @num_vcpus = numvcpus
+        @product_key = product_key
+        @owner = owner
+        @organization = organization
       end
     end
 
@@ -23,7 +26,7 @@ module Packer
             'boot_wait' => '2m',
             'communicator' => 'winrm',
             'winrm_username' => 'Administrator',
-            'winrm_password' => @admin_password,
+            'winrm_password' => @administrator_password,
             'winrm_timeout' => '5m',
             'winrm_insecure' => true,
             'shutdown_command' => "C:\\Windows\\System32\\shutdown.exe /s",
@@ -42,8 +45,8 @@ module Packer
         restart_provisioner = Provisioners::VMX_WINDOWS_RESTART.clone
 
         command = restart_provisioner['restart_command']
-        if !command.nil? && !command.index('ADMIN_PASSWORD').nil?
-          restart_provisioner['restart_command'] = command.sub('ADMIN_PASSWORD', @admin_password)
+        if !command.nil? && !command.index('administrator_password').nil?
+          restart_provisioner['restart_command'] = command.sub('administrator_password', @administrator_password)
         end
 
         [
@@ -58,20 +61,20 @@ module Packer
       end
     end
 
-    class VSphereStemcell < VSphereBase
+    class VSphere < VSphereBase
       def builders
         [
           'type' => 'vmware-vmx',
           'source_path' => @source_path,
           'headless' => false,
           'boot_wait' => '2m',
-          'shutdown_command' => "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File C:\\sysprep.ps1 -NewPassword #{@admin_password}",
+          'shutdown_command' => "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File C:\\sysprep.ps1 -NewPassword #{@administrator_password} -ProductKey #{@product_key} -Owner #{@owner} -Organization #{@organization}",
           'shutdown_timeout' => '1h',
           'communicator' => 'winrm',
           'ssh_username' => 'Administrator',
           'winrm_username' => 'Administrator',
-          'winrm_password' => @admin_password,
-          'winrm_timeout' => '2m',
+          'winrm_password' => @administrator_password,
+          'winrm_timeout' => '8m',
           'winrm_insecure' => true,
           'vmx_data' => {
             'memsize' => @mem_size.to_s,
