@@ -3,12 +3,12 @@ require 'securerandom'
 module Packer
   module Config
     class VSphereBase < Base
-      def initialize(admin_password, source_path, output_directory, mem_size=4096, num_vcpus=4)
+      def initialize(admin_password, source_path, output_directory, mem_size, num_vcpus)
         @admin_password = admin_password
         @source_path = source_path
+        @output_directory = output_directory
         @mem_size = mem_size
         @num_vcpus = num_vcpus
-        @output_directory = output_directory
       end
     end
 
@@ -38,8 +38,13 @@ module Packer
       end
 
       def provisioners
-        restart_provisioner = Provisioners::VMX_WINDOWS_RESTART
-        restart_provisioner['restart_command'] = restart_provisioner['restart_command'].sub!('ADMIN_PASSWORD', @admin_password)
+        # clone because we modify it
+        restart_provisioner = Provisioners::VMX_WINDOWS_RESTART.clone
+
+        command = restart_provisioner['restart_command']
+        if !command.nil? && !command.index('ADMIN_PASSWORD').nil?
+          restart_provisioner['restart_command'] = command.sub('ADMIN_PASSWORD', @admin_password)
+        end
 
         [
           Provisioners::CREATE_PROVISION_DIR,
@@ -54,7 +59,6 @@ module Packer
     end
 
     class VSphereStemcell < VSphereBase
-
       def builders
         [
           'type' => 'vmware-vmx',

@@ -24,22 +24,16 @@ describe Packer::Config do
           'output_directory' => 'output_dir'
         )
       end
-
-      context 'when not provided memsize or numvcpus' do
-        it 'uses the default values' do
-          builders = Packer::Config::VSphereAddUpdates.new('password', 'source_path', 'output_dir').builders
-          expect(builders[0]['vmx_data']['memsize']).to eq('4096')
-          expect(builders[0]['vmx_data']['numvcpus']).to eq('4')
-        end
-      end
     end
 
     describe 'provisioners' do
       it 'returns the expected provisioners' do
-        provisioners = Packer::Config::VSphereAddUpdates.new('password', 'source_path', 'output_dir').provisioners
+
+        config = Packer::Config::VSphereAddUpdates.new('admin_password', 'source_path', 'output_directory', 1024, 1)
+        provisioners = config.provisioners
 
         restart_provisioner = Packer::Config::Provisioners::VMX_WINDOWS_RESTART
-        restart_provisioner['restart_command'] = restart_provisioner['restart_command'].sub!('ADMIN_PASSWORD', 'password')
+        restart_provisioner['restart_command'] = restart_provisioner['restart_command'].sub!('ADMIN_PASSWORD', 'admin_password')
 
         expect(provisioners).to eq(
           [
@@ -80,19 +74,12 @@ describe Packer::Config do
           'output_directory' => 'output_dir'
         )
       end
-
-      context 'when not provided memsize or numvcpus' do
-        it 'uses the default values' do
-          builders = Packer::Config::VSphereStemcell.new('password', 'source_path', 'output_dir').builders
-          expect(builders[0]['vmx_data']['memsize']).to eq('4096')
-          expect(builders[0]['vmx_data']['numvcpus']).to eq('4')
-        end
-      end
     end
 
     describe 'provisioners' do
       it 'returns the expected provisioners' do
-        provisioners = Packer::Config::VSphereStemcell.new('password', 'source_path', 'output_dir').provisioners
+        config = Packer::Config::VSphereStemcell.new('admin_password', 'source_path', 'output_directory', 1024, 1)
+        provisioners = config.provisioners
         expect(provisioners).to eq(
           [
             Packer::Config::Provisioners::AGENT_ZIP,

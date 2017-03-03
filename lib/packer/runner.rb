@@ -24,8 +24,8 @@ module Packer
 
       packer_command = "packer #{command} -on-error abort -machine-readable #{args_combined} #{config_file.path}"
 
-      Open3.popen3(packer_command) do |stdin, stdout, stderr, wait_thr|
-        yield(stdout) if block_given?
+      Open3.popen2e(packer_command) do |stdin, out, wait_thr|
+        yield(out) if block_given?
         return wait_thr.value
       end
     end
