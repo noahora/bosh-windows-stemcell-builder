@@ -143,6 +143,9 @@ begin
   image_file = File.join(output_dir, 'image')
   puts "image_file: #{image_file}"
 
+  exec_command("gem install nokogiri")
+  require 'nokogiri'
+
   Dir.mktmpdir do |dir|
   exec_command("tar xf #{ova_file} -C #{dir}")
   f = Nokogiri::XML(File.open("#{dir}/packer-vmware-iso.ovf"))
