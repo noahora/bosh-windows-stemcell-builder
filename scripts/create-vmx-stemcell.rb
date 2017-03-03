@@ -141,28 +141,29 @@ begin
   puts "Running ovftool"
   exec_command("ovftool #{stemcell_vmx} #{ova_file}")
 
-  image_file = File.join(output_dir, 'image')
-  puts "image_file: #{image_file}"
-
+  ova_file_path = File.absolute_path(ova_file)
+  puts "OVA file path: #{ova_file_path}"
 
   Dir.mktmpdir do |dir|
-  exec_command("tar xf #{ova_file} -C #{dir}")
+  exec_command("tar xf #{ova_file_path} -C #{dir}")
   puts "#{dir} with ova file"
   f = Nokogiri::XML(File.open(File.join(dir,"image.ovf")))
   f.css("VirtualHardwareSection Item").select {|x| x.to_s =~ /ethernet/}.first.remove
   puts "Writing OVF file "
   File.write(File.join(dir,"image.ovf"), f.to_s)
   puts "Wrote OVF file"
-  ova_file_path = File.absolute_path(ova_file)
-  puts "OVA file path: #{ova_file_path}"
   Dir.chdir(dir) do
     exec_command("tar cf #{ova_file_path} *")
   end
   puts "Removed ethernet"
   end
 
+  image_file = File.join(output_dir, 'image')
+  puts "image_file: #{image_file}"
+
   puts "Gzip OVA file"
   gzip_file(ova_file, image_file)
+  puts "Gziped"
   image_sha1 = Digest::SHA1.file(image_file).hexdigest
   MFTemplate.new("#{BUILDER_PATH}/erb_templates/vsphere/stemcell.MF.erb", VERSION, sha1: image_sha1).save(output_dir)
 
