@@ -19,7 +19,7 @@
       "headless": false,
       "boot_wait": "2m",
 
-      "shutdown_command": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File a:\\sysprep.ps1 -NewPassword {{user `administrator_password`}} -ProductKey {{user `product_key`}} -Owner {{user `owner`}} -Organization {{user `organization`}}",
+      "shutdown_command": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File C:\\sysprep.ps1 -NewPassword {{user `administrator_password`}} -ProductKey {{user `product_key`}} -Owner {{user `owner`}} -Organization {{user `organization`}}",
       "shutdown_timeout": "1h",
 
       "communicator": "winrm",
