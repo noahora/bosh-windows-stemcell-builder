@@ -5,6 +5,7 @@ import 'lib/tasks/build/gcp.rake'
 import 'lib/tasks/build/vsphere.rake'
 
 namespace :build do
+  desc 'Build Azure Stemcell'
   task :azure do
     puts 'build:azure'
   end

@@ -5,8 +5,8 @@ require 'zlib'
 module Stemcell
   class Builder
     class VSphereAddUpdates < Base
-      def initialize(source_vmx:, administrator_password:, mem_size: 4096, num_vcpus: 4, **args)
-        @source_vmx = source_vmx
+      def initialize(source_path:, administrator_password:, mem_size: 4096, num_vcpus: 4, **args)
+        @source_path = source_path
         @administrator_password = administrator_password
         @mem_size = mem_size
         @num_vcpus = num_vcpus
@@ -32,33 +32,29 @@ module Stemcell
     end
 
     class VSphere < Base
-      def initialize(admininistrator_password:, input_bucket:,
-                     output_bucket:, vmx_cache_dir:, product_key:,
+      def initialize(source_path:, administrator_password:,
+                     mem_size:, num_vcpus:,
+                     product_key:,
                      owner:, organization:, **args)
+        @source_path = source_path
         @administrator_password = administrator_password
-        @input_bucket = input_bucket
-        @output_bucket = output_bucket
-        @vmx_cache_dir = vmx_cache_dir
+        @mem_size = mem_size
+        @num_vcpus = num_vcpus
         @product_key = product_key
         @owner = owner
         @organization = organization
-        @mem_size = 4096
-        @num_vcpus = 4
         super(args)
       end
 
       def build
-        Dir.mktmpdir('stemcell-') do |tmpdir|
-          puts "hello"
-          # vmx_output_dir = File.join(tmpdir, 'vmx_output')
-          # run_packer(vmx_output_dir)
-          # image_path, sha = create_image(tmpdir, vmx_output_dir)
-          # manifest = Manifest::VSphere.new(@version, sha, @os).dump
-          # super(iaas: 'vsphere', is_light: false, image_path: image_path, manifest: manifest)
-        end
+        run_packer(@output_dir)
+        image_path, sha = create_image(@output_dir)
+        manifest = Manifest::VSphere.new(@version, sha, @os).dump
+        super(iaas: 'vsphere', is_light: false, image_path: image_path, manifest: manifest)
       end
 
       private
+
       def find_vmx_file(dir)
         pattern = File.join(dir, "*.vmx").gsub('\\', '/')
         files = Dir.glob(pattern)
@@ -82,21 +78,25 @@ module Stemcell
         end
       end
 
-      def create_image(tmp_dir, vmx_dir)
-        vmx_file = find_vmx_file(vmx_dir)
-        ova_file = File.join(tmp_dir, 'image.ova')
-        image_file = File.join(tmp_dir, 'image')
-        exec_command("ovftool #{vmx_file} #{ova_file}")
-        gzip_file(ova_file, image_file)
-        sha1_sum = Digest::SHA1.file(image_file).hexdigest
-
-        [image_file, sha1_sum]
+      def create_image(vmx_dir)
+        sha1_sum=''
+        image_file = File.join(vmx_dir, 'image')
+        Dir.mktmpdir do |tmpdir|
+          vmx_file = find_vmx_file(vmx_dir)
+          ova_file = File.join(tmp_dir, 'image.ova')
+          exec_command("ovftool #{vmx_file} #{ova_file}")
+          gzip_file(ova_file, image_file)
+          sha1_sum = Digest::SHA1.file(image_file).hexdigest
+        end
+        [image_file,sha1_sum]
       end
 
       def packer_config(vmx_output_dir)
-        Packer::Config::VSphere.new(@administrator_password, @source_vmx,
-                                    vmx_output_dir, @mem_size, @num_vcpus,@product_key,
-                                    @owner, @organization).dump
+        Packer::Config::VSphere.new(
+          @administrator_password, @source_path,
+          vmx_output_dir, @mem_size, @num_vcpus,
+          @product_key,@owner, @organization
+        ).dump
       end
 
       def run_packer(vmx_output_dir)

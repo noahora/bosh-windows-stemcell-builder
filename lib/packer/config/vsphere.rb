@@ -3,7 +3,8 @@ require 'securerandom'
 module Packer
   module Config
     class VSphereBase < Base
-      def initialize(administrator_password, source_path, output_directory, memsize, numvcpus, product_key, owner, organization)
+      def initialize(administrator_password, source_path, output_directory,
+                     memsize, numvcpus, product_key, owner, organization)
         @administrator_password = administrator_password
         @source_path = source_path
         @output_directory = output_directory

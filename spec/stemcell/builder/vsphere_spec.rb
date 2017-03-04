@@ -57,10 +57,12 @@ describe Stemcell::Builder do
   describe 'VSphere' do
     describe 'build' do
       it 'builds a stemcell tarball' do
-        administrator_password = 'my-password'
         input_bucket= 'in-bucket'
         output_bucket= 'out-bucket'
         vmx_cache_dir= 'vmx-cache-dir'
+
+        source_path = vmx_cache_dir
+        administrator_password = 'my-password'
         product_key = 'product-key'
         owner = 'owner'
         organization = 'organization'
@@ -73,11 +75,11 @@ describe Stemcell::Builder do
         agent_commit = 'some-agent-commit'
         sha = 'sha'
         os = 'windows2012R2'
+        image = 'some-image'
         command = 'build'
         packer_vars = {some_var: 'some-value'}
         packer_output = ''
-        source_path = ''
-        output_directory = ''
+        output_directory = output_dir
 
         packer_runner = double(:packer_runner)
         allow(packer_runner).to receive(:run).with(command, packer_vars).
@@ -99,26 +101,33 @@ describe Stemcell::Builder do
 
         allow(Stemcell::Manifest::VSphere).to receive(:new).with(version, sha, os).and_return(vsphere_manifest)
         allow(Stemcell::ApplySpec).to receive(:new).with(agent_commit).and_return(vsphere_apply)
-        allow(Stemcell::Packager).to receive(:package).with(iaas: 'vsphere',
-                                                            os: os,
-                                                            is_light: true,
-                                                            version: version,
-                                                            image_path: '',
-                                                            manifest: manifest_contents,
-                                                            apply_spec: apply_spec_contents,
-                                                            output_dir: output_dir
-                                                           ).and_return('path-to-stemcell')
+        allow(Stemcell::Packager).to receive(:package).with(
+          iaas: 'vsphere',
+          os: os,
+          is_light: false,
+          version: version,
+          image_path: image,
+          manifest: manifest_contents,
+          apply_spec: apply_spec_contents,
+          output_dir: output_dir
+        ).and_return('path-to-stemcell')
 
-        Stemcell::Builder::VSphere.new(
+        builder = Stemcell::Builder::VSphere.new(
+          os: os,
+          output_dir: output_dir,
+          version: version,
+          agent_commit: agent_commit,
+          packer_vars: packer_vars,
           administrator_password: administrator_password,
-          input_bucket: input_bucket,
-          output_bucket: output_bucket,
-          vmx_cache_dir: vmx_cache_dir,
+          source_path: source_path,
+          mem_size: mem_size,
+          num_vcpus: num_vcpus,
           product_key: product_key,
           owner: owner,
-          organization: organization
-        ).build
-        expect(_path).to eq('path-to-stemcell')
+          organization: organization,
+        )
+        allow(builder).to receive(:create_image).and_return([image,sha])
+        expect(builder.build).to eq('path-to-stemcell')
       end
 
       # TODO
