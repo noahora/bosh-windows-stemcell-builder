@@ -111,7 +111,7 @@ module Packer
 
       ENABLE_RDP = {
         'type' => 'windows-shell',
-        'scripts' => ['scripts/enable-rdp.bat']
+        'scripts' => ['scripts/vsphere/enable-rdp.bat']
       }.freeze
 
       GCP_AGENT_CONFIG = {
