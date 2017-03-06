@@ -15,13 +15,9 @@ outputs:
   - name: bosh-windows-stemcell
 
 run:
-  path: powershell
+  path: ruby.exe
   args:
-    - '-c'
-    - |
-      cd stemcell-builder
-      bundle install
-      rake build:vsphere
+    - stemcell-builder/scripts/create-vmx-stemcell.rb
 
 params:
   AWS_ACCESS_KEY_ID:
