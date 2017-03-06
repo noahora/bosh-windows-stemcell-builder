@@ -1,6 +1,6 @@
 require 'rspec/core/rake_task'
-require 's3'
 require 'json'
+require_relative '../../s3'
 
 namespace :build do
   task :vsphere do
@@ -10,7 +10,7 @@ namespace :build do
     vmx_version = File.read(File.join(build_dir, 'vmx-version', 'number')).chomp
     agent_commit = File.read(File.join(build_dir, 'compiled-agent', 'sha')).chomp
 
-    FileUtils.mkdir_p(ENV.fetch('OUTPUT_DIR'))
+    FileUtils.rm_rf("bosh-windows-stemcell")
 
     vmx = S3::Vmx.new(
       aws_access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID"),
@@ -33,7 +33,7 @@ namespace :build do
       num_vcpus: ENV.fetch('NUM_VCPUS', '6'),
       agent_commit: agent_commit,
       os: ENV.fetch("OS_VERSION"),
-      output_dir: ENV.fetch("OUTPUT_DIR"),
+      output_dir: "bosh-window-stemcell",
       packer_vars: {},
       version: version
     )
