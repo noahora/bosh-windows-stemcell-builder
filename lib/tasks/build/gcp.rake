@@ -30,6 +30,7 @@ namespace :build do
     rescue => e
       puts "Failed to build stemcell: #{e.message}"
       puts e.backtrace
+      exit 1
     end
   end
 end
