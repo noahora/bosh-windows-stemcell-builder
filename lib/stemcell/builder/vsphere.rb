@@ -102,7 +102,9 @@ module Stemcell
       def run_packer(vmx_output_dir)
         config = packer_config(vmx_output_dir)
         exit_status = Packer::Runner.new(config).run('build', @packer_vars) do |out|
-          puts out
+          out.each_line |line| do
+            puts line
+          end
         end
         if exit_status != 0
           raise PackerFailure
