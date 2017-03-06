@@ -32,10 +32,11 @@ module S3
     end
 
     def fetch(version)
+      version = version.scan(/(\d+)\./).flatten.first
       vmx_tarball = File.join(@vmx_cache_dir,"vmx-v#{version}.tgz")
       puts "Checking for #{vmx_tarball}"
       if !File.exist?(vmx_tarball)
-        @client.get(@bucket,"vmx-v#{version}.tgz",vmx_tarball)
+        @client.get(@input_bucket,"vmx-v#{version}.tgz",vmx_tarball)
       else
         puts "VMX file #{vmx_tarball} found in cache."
       end
