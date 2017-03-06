@@ -4,15 +4,12 @@ module Packer
   module Config
     class VSphereBase < Base
       def initialize(administrator_password, source_path, output_directory,
-                     memsize, numvcpus, product_key, owner, organization)
+                     memsize, numvcpus)
         @administrator_password = administrator_password
         @source_path = source_path
         @output_directory = output_directory
         @mem_size = memsize
         @num_vcpus = numvcpus
-        @product_key = product_key
-        @owner = owner
-        @organization = organization
       end
     end
 
@@ -63,6 +60,12 @@ module Packer
     end
 
     class VSphere < VSphereBase
+      def initialize(product_key,owner,organization,*args)
+        @product_key = product_key
+        @owner = owner
+        @organization = organization
+        super(*args)
+      end
       def builders
         [
           'type' => 'vmware-vmx',

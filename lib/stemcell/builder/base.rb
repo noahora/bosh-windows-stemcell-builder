@@ -28,21 +28,27 @@ module Stemcell
 
       private
 
-        def run_packer
-          packer_artifact = nil
-          exit_status = Packer::Runner.new(packer_config).run('build', @packer_vars) do |stdout|
-            packer_artifact = parse_packer_output(stdout)
-          end
-          if exit_status != 0
-              raise PackerFailure
-          end
-          packer_artifact
+      def run_packer
+        packer_artifact = nil
+        exit_status = Packer::Runner.new(packer_config).run('build', @packer_vars) do |stdout|
+          packer_artifact = parse_packer_output(stdout)
         end
+        if exit_status != 0
+          raise PackerFailure
+        end
+        packer_artifact
+      end
 
-        def exec_command(cmd)
-          `#{cmd}`
-          raise "command '#{cmd}' failed" unless $?.success?
+      def exec_command(cmd)
+        `#{cmd}`
+        raise "command '#{cmd}' failed" unless $?.success?
+      end
+
+      def parse_packer_output(packer_output)
+        packer_output.each_line do |line|
+          puts line
         end
+      end
     end
   end
 end
