@@ -27,11 +27,14 @@ describe 'VSphere' do
       version = 'some-version'
       agent_commit = 'some-agent-commit'
 
-      ENV['ADMINISTRATOR_PASSWORD'] = 'pass'
+      ENV['AWS_ACCESS_KEY_ID']= 'some-key'
+      ENV['AWS_SECRET_ACCESS_KEY'] = 'secret-key'
+      ENV['AWS_REGION'] = 'some-region'
       ENV['INPUT_BUCKET'] = 'input-vmx-bucket'
       ENV['VMX_CACHE_DIR'] = '/tmp'
       ENV['OUTPUT_BUCKET'] = 'stemcell-output-bucket'
 
+      ENV['ADMINISTRATOR_PASSWORD'] = 'pass'
       ENV['PRODUCT_KEY'] = 'product-key'
       ENV['OWNER'] = 'owner'
       ENV['ORGANIZATION'] = 'organization'
@@ -39,6 +42,12 @@ describe 'VSphere' do
       ENV['OS_VERSION'] = os_version
       ENV['OUTPUT_DIR'] = output_dir
       ENV['PATH'] = "#{File.join(@build_dir, '..', 'spec', 'fixtures', 'vsphere')}:#{ENV['PATH']}"
+
+      FileUtils.mkdir_p(File.join(@build_dir, 'compiled-agent'))
+      File.write(
+        File.join(@build_dir, 'compiled-agent', 'sha'),
+        agent_commit
+      )
 
       FileUtils.mkdir_p(File.join(@build_dir, 'version'))
       File.write(
@@ -51,22 +60,32 @@ describe 'VSphere' do
         'some-vmx-version'
       )
 
-      Rake::Task['build:vsphere'].invoke
 
+      s3_vmx= double(:s3_vmx)
+      allow(s3_vmx).to receive(:fetch).and_return("1234")
+
+      allow(S3::Vmx).to receive(:new).with(
+        aws_access_key_id: 'some-key',
+        aws_secret_access_key: 'secret-key',
+        aws_region: 'some-region',
+        input_bucket: 'input-vmx-bucket',
+        output_bucket: 'stemcell-output-bucket',
+        vmx_cache_dir: '/tmp')
+        .and_return(s3_vmx)
+
+      Rake::Task['build:vsphere'].invoke
       stemcell = File.join(output_dir, "bosh-stemcell-#{version}-vsphere-esxi-#{os_version}-go_agent.tgz")
 
-      # stemcell_manifest = YAML.load(read_from_tgz(stemcell, 'stemcell.MF'))
-      # expect(stemcell_manifest['version']).to eq(version)
-      # expect(stemcell_manifest['sha1']).to eq(EMPTY_FILE_SHA)
-      # expect(stemcell_manifest['operating_system']).to eq(os_version)
-      # expect(stemcell_manifest['cloud_properties']['infrastructure']).to eq('aws')
-      # expect(stemcell_manifest['cloud_properties']['ami']['us-east-1']).to eq('ami-east1id')
-      # expect(stemcell_manifest['cloud_properties']['ami']['us-east-2']).to eq('ami-east2id')
+      stemcell_manifest = YAML.load(read_from_tgz(stemcell, 'stemcell.MF'))
+      expect(stemcell_manifest['version']).to eq(version)
+      expect(stemcell_manifest['sha1']).to_not be_empty
+      expect(stemcell_manifest['operating_system']).to eq(os_version)
+      expect(stemcell_manifest['cloud_properties']['infrastructure']).to eq('vsphere')
 
-      # apply_spec = JSON.parse(read_from_tgz(stemcell, 'apply_spec.yml'))
-      # expect(apply_spec['agent_commit']).to eq(agent_commit)
+       apply_spec = JSON.parse(read_from_tgz(stemcell, 'apply_spec.yml'))
+       expect(apply_spec['agent_commit']).to eq(agent_commit)
 
-      expect(read_from_tgz(stemcell, 'image')).to be_nil
+      expect(read_from_tgz(stemcell, 'image')).to_not be_nil
     end
   end
 end

@@ -100,7 +100,7 @@ describe Stemcell::Builder do
         allow(Stemcell::Manifest::VSphere).to receive(:new).with(version, sha, os).and_return(vsphere_manifest)
         allow(Stemcell::ApplySpec).to receive(:new).with(agent_commit).and_return(vsphere_apply)
         allow(Stemcell::Packager).to receive(:package).with(
-          iaas: 'vsphere',
+          iaas: 'vsphere-esxi',
           os: os,
           is_light: false,
           version: version,

@@ -50,7 +50,7 @@ module Stemcell
         run_packer(@output_dir)
         image_path, sha = create_image(@output_dir)
         manifest = Manifest::VSphere.new(@version, sha, @os).dump
-        super(iaas: 'vsphere', is_light: false, image_path: image_path, manifest: manifest)
+        super(iaas: 'vsphere-esxi', is_light: false, image_path: image_path, manifest: manifest)
       end
 
       private
@@ -83,7 +83,7 @@ module Stemcell
         image_file = File.join(vmx_dir, 'image')
         Dir.mktmpdir do |tmpdir|
           vmx_file = find_vmx_file(vmx_dir)
-          ova_file = File.join(tmp_dir, 'image.ova')
+          ova_file = File.join(tmpdir, 'image.ova')
           exec_command("ovftool #{vmx_file} #{ova_file}")
           gzip_file(ova_file, image_file)
           sha1_sum = Digest::SHA1.file(image_file).hexdigest

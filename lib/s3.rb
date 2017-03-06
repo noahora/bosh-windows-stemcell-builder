@@ -23,8 +23,8 @@ module S3
 
   class Vmx
     def initialize(
-      aws_access_key_id,aws_secret_access_key,aws_region,
-      input_bucket, output_bucket,vmx_cache_dir)
+      aws_access_key_id:,aws_secret_access_key:,aws_region:,
+      input_bucket:, output_bucket:,vmx_cache_dir:)
       @client = S3::Client.new(aws_access_key_id,aws_secret_access_key,aws_region)
       @input_bucket = input_bucket
       @output_bucket = output_bucket
@@ -42,7 +42,7 @@ module S3
 
       # Find the vmx directory matching version, untar if not cached
       vmx_dir=File.join(@vmx_cache_dir,version)
-      puts "Checking for #{vms_dir}"
+      puts "Checking for #{vmx_dir}"
       if !Dir.exist?(vmx_dir)
         FileUtils.mkdir_p(vmx_dir)
         exec_command("tar -xzvf #{vmx_tarball} -C #{vmx_dir}")
