@@ -3,12 +3,25 @@ platform: windows
 
 inputs:
   - name: version
+    path: stemcell-builder/build/version
+  - name: vmx-version
+    path: stemcell-builder/build/vmx-version
   - name: compiled-agent
+    path: stemcell-builder/build/compiled-agent
   - name: stemcell-builder
   - name: windows-stemcell-dependencies
-  - name: vmx-version
+    path: stemcell-builder/build/windows-stemcell-dependencies
 outputs:
   - name: bosh-windows-stemcell
+
+run:
+  path: powershell
+  args:
+    - '-c'
+    - |
+      cd stemcell-builder
+      bundle install
+      rake build:vsphere
 
 params:
   AWS_ACCESS_KEY_ID:
@@ -16,12 +29,14 @@ params:
   AWS_REGION: us-east-1
 
   ADMINISTRATOR_PASSWORD: replace-me
+  OUTPUT_DIR:
+  OS_VERSION: windows2012R2
 
   INPUT_BUCKET: "bosh-windows-stemcell-vmx"
   OUTPUT_BUCKET: "bosh-windows-stemcells-pre-release-candidate"
   VMX_CACHE: "C:\\vmx-data"
 
-run:
-  path: ruby.exe
-  args:
-  - stemcell-builder/scripts/create-vmx-stemcell.rb
+  PRODUCT_KEY:
+  ORGANIZATION:
+  OWNER:
+

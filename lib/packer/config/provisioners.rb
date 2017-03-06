@@ -31,7 +31,7 @@ module Packer
 
       VMX_PSWINDOWSUPDATE = {
         'type' => 'file',
-        'source' => '../../windows-stemcell-dependencies/ps-windowsupdate/PSWindowsUpdate.zip',
+        'source' => 'build/windows-stemcell-dependencies/ps-windowsupdate/PSWindowsUpdate.zip',
         'destination' => 'C:\\provision\\PSWindowsUpdate.zip'
       }.freeze
 
