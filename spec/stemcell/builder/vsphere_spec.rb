@@ -13,55 +13,52 @@ describe Stemcell::Builder do
   # TODO
   # describe 'VSphereAddUpdates' do
   #   describe 'build' do
-      # it 'builds a vmx from a source vmx'
-        # source_vmx = 'my-vmx'
-        # admin_password = 'my-password'
-        # mem_size = 1024
-        # num_vcpus = 1
-        # command = 'build'
-        # packer_vars = {some_var: 'some-value'}
+  # it 'builds a vmx from a source vmx'
+  # source_vmx = 'my-vmx'
+  # admin_password = 'my-password'
+  # mem_size = 1024
+  # num_vcpus = 1
+  # command = 'build'
+  # packer_vars = {some_var: 'some-value'}
 
-        # packer_runner = double(:packer_runner)
-        # allow(packer_runner).to receive(:run).with(command, packer_vars).
-        #   and_yield(packer_output).and_return(0)
-        # allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
+  # packer_runner = double(:packer_runner)
+  # allow(packer_runner).to receive(:run).with(command, packer_vars).
+  #   and_yield(packer_output).and_return(0)
+  # allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
 
-        # packer_config = double(:packer_config)
-        # allow(packer_config).to receive(:dump).and_return(config)
+  # packer_config = double(:packer_config)
+  # allow(packer_config).to receive(:dump).and_return(config)
 
-        # allow(Packer::Config::VSphereAddUpdates).to receive(:new).with(admin_password,
-        #   source_path, output_directory, mem_size, num_vcpus).and_return(packer_config)
+  # allow(Packer::Config::VSphereAddUpdates).to receive(:new).with(admin_password,
+  #   source_path, output_directory, mem_size, num_vcpus).and_return(packer_config)
 
-        # Stemcell::Builder::VSphereAddUpdates.new(
-        #   source_vmx: source_vmx,
-        #   admin_password: admin_password,
-        #   mem_size: mem_size,
-        #   num_vcpus: num_vcpus,
-        #   output_dir: output_dir,
-        #   packer_vars: packer_vars
-        # ).build
-        # expect(_path).to eq('path-to-stemcell')
-      # end
-      #
-      #
-      # context 'when packer fails' do
-        # it 'raises an error' do
-        # end
+  # Stemcell::Builder::VSphereAddUpdates.new(
+  #   source_vmx: source_vmx,
+  #   admin_password: admin_password,
+  #   mem_size: mem_size,
+  #   num_vcpus: num_vcpus,
+  #   output_dir: output_dir,
+  #   packer_vars: packer_vars
+  # ).build
+  # expect(_path).to eq('path-to-stemcell')
+  # end
+  #
+  #
+  # context 'when packer fails' do
+  # it 'raises an error' do
+  # end
 
-      #   it 'does not add the VM to the VMX directory' do
-      #   end
-      # end
+  #   it 'does not add the VM to the VMX directory' do
+  #   end
+  # end
   #   end
   # end
 
   describe 'VSphere' do
     describe 'build' do
       it 'builds a stemcell tarball' do
-        input_bucket= 'in-bucket'
-        output_bucket= 'out-bucket'
-        vmx_cache_dir= 'vmx-cache-dir'
 
-        source_path = vmx_cache_dir
+        source_path = 'source-path'
         administrator_password = 'my-password'
         product_key = 'product-key'
         owner = 'owner'
@@ -89,7 +86,8 @@ describe Stemcell::Builder do
         packer_config = double(:packer_config)
         allow(packer_config).to receive(:dump).and_return(config)
 
-        allow(Packer::Config::VSphere).to receive(:new).with(administrator_password,
+        allow(Packer::Config::VSphere).to receive(:new).with(
+          administrator_password,
           source_path, output_directory, mem_size, num_vcpus, product_key,
           owner, organization).and_return(packer_config)
 
@@ -130,11 +128,52 @@ describe Stemcell::Builder do
         expect(builder.build).to eq('path-to-stemcell')
       end
 
-      # TODO
-      # context 'when packer fails' do
-      #   it 'raises an error' do
-      #   end
-      # end
+      context 'when packer fails' do
+        it 'raises an error' do
+          source_path = 'source-path'
+          administrator_password = 'my-password'
+          product_key = 'product-key'
+          owner = 'owner'
+          organization = 'organization'
+          mem_size = '4'
+          num_vcpus = '8'
+          config = 'some-packer-config'
+          version = 'stemcell-version'
+          agent_commit = 'some-agent-commit'
+          os = 'windows2012R2'
+          command = 'build'
+          packer_vars = {some_var: 'some-value'}
+          output_directory = output_dir
+
+          packer_runner = double(:packer_runner)
+          allow(packer_runner).to receive(:run).with(command, packer_vars).and_return(1)
+          allow(Packer::Runner).to receive(:new).with(config).and_return(packer_runner)
+
+          packer_config = double(:packer_config)
+          allow(packer_config).to receive(:dump).and_return(config)
+
+          allow(Packer::Config::VSphere).to receive(:new).with(
+            administrator_password,
+            source_path, output_directory, mem_size, num_vcpus, product_key,
+            owner, organization).and_return(packer_config)
+
+          expect {
+            Stemcell::Builder::VSphere.new(
+              os: os,
+              output_dir: output_dir,
+              version: version,
+              agent_commit: agent_commit,
+              packer_vars: packer_vars,
+              administrator_password: administrator_password,
+              source_path: source_path,
+              mem_size: mem_size,
+              num_vcpus: num_vcpus,
+              product_key: product_key,
+              owner: owner,
+              organization: organization,
+            ).build }.to raise_error(Stemcell::Builder::PackerFailure)
+        end
+      end
     end
   end
 end

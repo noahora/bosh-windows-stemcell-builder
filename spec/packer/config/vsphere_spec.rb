@@ -1,71 +1,74 @@
 require 'packer/config'
 
 describe Packer::Config do
-  describe 'VSphereAddUpdates' do
+  # describe 'VSphereAddUpdates' do
+  #   describe 'builders' do
+  #     it 'returns the expected builders' do
+  #       builders = Packer::Config::VSphereAddUpdates.new('password', 'source_path', 'output_dir', 1000, 1).builders
+  #       expect(builders[0]).to eq(
+  #         'type' => 'vmware-vmx',
+  #         'source_path' => 'source_path',
+  #         'headless' => false,
+  #         'boot_wait' => '2m',
+  #         'communicator' => 'winrm',
+  #         'winrm_username' => 'Administrator',
+  #         'winrm_password' => 'password',
+  #         'winrm_timeout' => '5m',
+  #         'winrm_insecure' => true,
+  #         'shutdown_command' => "C:\\Windows\\System32\\shutdown.exe /s",
+  #         'shutdown_timeout' => '1h',
+  #         'vmx_data' => {
+  #           'memsize' => '1000',
+  #           'numvcpus' => '1'
+  #         },
+  #         'output_directory' => 'output_dir'
+  #       )
+  #     end
+  #   end
+
+  #   describe 'provisioners' do
+  #     it 'returns the expected provisioners' do
+
+  #       config = Packer::Config::VSphereAddUpdates.new('admin_password', 'source_path', 'output_directory', 1024, 1)
+  #       provisioners = config.provisioners
+
+  #       restart_provisioner = Packer::Config::Provisioners::VMX_WINDOWS_RESTART
+  #       restart_provisioner['restart_command'] = restart_provisioner['restart_command'].sub!('ADMIN_PASSWORD', 'admin_password')
+
+  #       expect(provisioners).to eq(
+  #         [
+  #           Packer::Config::Provisioners::CREATE_PROVISION_DIR,
+  #           Packer::Config::Provisioners::VMX_UPDATE_PROVISIONER,
+  #           Packer::Config::Provisioners::VMX_AUTORUN_UPDATES,
+  #           Packer::Config::Provisioners::VMX_POWERSHELLUTILS,
+  #           Packer::Config::Provisioners::VMX_PSWINDOWSUPDATE,
+  #           restart_provisioner, # Required because we need to set the admin password
+  #           Packer::Config::Provisioners::VMX_READ_UPDATE_LOG
+  #         ]
+  #       )
+  #     end
+  #   end
+  # end
+
+  describe 'VSphere' do
     describe 'builders' do
       it 'returns the expected builders' do
-        builders = Packer::Config::VSphereAddUpdates.new('password', 'source_path', 'output_dir', 1000, 1).builders
+        builders = Packer::Config::VSphere.new(
+          'password', 'source_path',
+          'output_dir', 1000, 1,
+          'key','me','me').builders
         expect(builders[0]).to eq(
           'type' => 'vmware-vmx',
           'source_path' => 'source_path',
           'headless' => false,
           'boot_wait' => '2m',
-          'communicator' => 'winrm',
-          'winrm_username' => 'Administrator',
-          'winrm_password' => 'password',
-          'winrm_timeout' => '5m',
-          'winrm_insecure' => true,
-          'shutdown_command' => "C:\\Windows\\System32\\shutdown.exe /s",
-          'shutdown_timeout' => '1h',
-          'vmx_data' => {
-            'memsize' => '1000',
-            'numvcpus' => '1'
-          },
-          'output_directory' => 'output_dir'
-        )
-      end
-    end
-
-    describe 'provisioners' do
-      it 'returns the expected provisioners' do
-
-        config = Packer::Config::VSphereAddUpdates.new('admin_password', 'source_path', 'output_directory', 1024, 1)
-        provisioners = config.provisioners
-
-        restart_provisioner = Packer::Config::Provisioners::VMX_WINDOWS_RESTART
-        restart_provisioner['restart_command'] = restart_provisioner['restart_command'].sub!('ADMIN_PASSWORD', 'admin_password')
-
-        expect(provisioners).to eq(
-          [
-            Packer::Config::Provisioners::CREATE_PROVISION_DIR,
-            Packer::Config::Provisioners::VMX_UPDATE_PROVISIONER,
-            Packer::Config::Provisioners::VMX_AUTORUN_UPDATES,
-            Packer::Config::Provisioners::VMX_POWERSHELLUTILS,
-            Packer::Config::Provisioners::VMX_PSWINDOWSUPDATE,
-            restart_provisioner, # Required because we need to set the admin password
-            Packer::Config::Provisioners::VMX_READ_UPDATE_LOG
-          ]
-        )
-      end
-    end
-  end
-
-  describe 'VSphereStemcell' do
-    describe 'builders' do
-      it 'returns the expected builders' do
-        builders = Packer::Config::VSphereStemcell.new('password', 'source_path', 'output_dir', 1000, 1).builders
-        expect(builders[0]).to eq(
-          'type' => 'vmware-vmx',
-          'source_path' => 'source_path',
-          'headless' => false,
-          'boot_wait' => '2m',
-          'shutdown_command' => 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File C:\\sysprep.ps1 -NewPassword password',
+          'shutdown_command' => 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File C:\\sysprep.ps1 -NewPassword password -ProductKey key -Owner me -Organization me',
           'shutdown_timeout' => '1h',
           'communicator' => 'winrm',
           'ssh_username' => 'Administrator',
           'winrm_username' => 'Administrator',
           'winrm_password' => 'password',
-          'winrm_timeout' => '2m',
+          'winrm_timeout' => '8m',
           'winrm_insecure' => true,
           'vmx_data' => {
             'memsize' => '1000',
@@ -78,8 +81,10 @@ describe Packer::Config do
 
     describe 'provisioners' do
       it 'returns the expected provisioners' do
-        config = Packer::Config::VSphereStemcell.new('admin_password', 'source_path', 'output_directory', 1024, 1)
-        provisioners = config.provisioners
+        provisioners = Packer::Config::VSphere.new(
+          'password', 'source_path',
+          'output_dir', 1000, 1,
+          'key','me','me').provisioners
         expect(provisioners).to eq(
           [
             Packer::Config::Provisioners::AGENT_ZIP,
