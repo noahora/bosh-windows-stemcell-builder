@@ -48,7 +48,7 @@ module Packer
 
       VMX_STEMCELL_SYSPREP = {
         'type' => 'file',
-        'source' => '../vsphere/scripts/sysprep.ps1',
+        'source' => 'scripts/vsphere/sysprep.ps1',
         'destination' => 'C:\\sysprep.ps1'
       }.freeze
 
@@ -148,7 +148,7 @@ module Packer
 
       CHECK_UPDATES = {
         'type' => 'powershell',
-        'scripts' => ['../scripts/check-updates.ps1']
+        'scripts' => ['scripts/check-updates.ps1']
       }.freeze
 
       SET_EC2_PASSWORD = {
