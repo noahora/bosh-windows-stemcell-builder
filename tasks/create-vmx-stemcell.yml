@@ -3,14 +3,10 @@ platform: windows
 
 inputs:
   - name: version
-    path: stemcell-builder/build/version
   - name: vmx-version
-    path: stemcell-builder/build/vmx-version
   - name: compiled-agent
-    path: stemcell-builder/build/compiled-agent
   - name: stemcell-builder
   - name: windows-stemcell-dependencies
-    path: stemcell-builder/build/windows-stemcell-dependencies
 outputs:
   - name: bosh-windows-stemcell
 
