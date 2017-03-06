@@ -137,7 +137,7 @@ module Packer
 
       POLICY_BASELINE_ZIP = {
         'type' => 'file',
-        'source' => 'policy-baseline.zip',
+        'source' => 'build/windows-stemcell-dependencies/policy-baseline/policy-baseline.zip',
         'destination' => 'C:\\policy-baseline.zip'
       }.freeze
 
