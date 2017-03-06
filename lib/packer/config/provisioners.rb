@@ -13,13 +13,13 @@ module Packer
 
       VMX_UPDATE_PROVISIONER = {
         'type' => 'file',
-        'source' => 'scripts/update-provisioner.ps1',
+        'source' => 'scripts/vsphere/update-provisioner.ps1',
         'destination' => 'C:\\provision\\update-provisioner.ps1'
       }.freeze
 
       VMX_AUTORUN_UPDATES = {
         'type' => 'file',
-        'source' => 'scripts/autorun-updates.ps1',
+        'source' => 'scripts/vsphere/autorun-updates.ps1',
         'destination' => 'C:\\provision\\autorun-updates.ps1'
       }.freeze
 
@@ -54,7 +54,7 @@ module Packer
 
       ADD_VCAP_GROUP = {
         'type' => 'powershell',
-        'scripts' => ['scripts/add-vcap-group.ps1']
+        'scripts' => ['scripts/vsphere/add-vcap-group.ps1']
       }.freeze
 
       AGENT_DEPS_ZIP = {
@@ -91,7 +91,7 @@ module Packer
 
       RUN_POLICIES = {
         'type' => 'powershell',
-        'scripts' => ['scripts/run-policies.ps1']
+        'scripts' => ['scripts/vsphere/run-policies.ps1']
       }.freeze
 
       COMPACT_DISK = {
@@ -101,7 +101,7 @@ module Packer
 
       DISABLE_AUTO_LOGON = {
         'type' => 'windows-shell',
-        'scripts' => ['scripts/disable-auto-logon.bat']
+        'scripts' => ['scripts/vsphere/disable-auto-logon.bat']
       }.freeze
 
       DISABLE_SERVICES = {
