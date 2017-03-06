@@ -12,17 +12,19 @@ describe 'VSphere' do
   before(:each) do
     @original_env = ENV.to_hash
     @build_dir = File.expand_path('../../../build', __FILE__)
+    @output_dir = 'bosh-windows-stemcell'
     FileUtils.mkdir_p(@build_dir)
+    FileUtils.rm_rf(@output_dir)
   end
 
   after(:each) do
     ENV.replace(@original_env)
-    FileUtils.remove_dir(@build_dir)
+    FileUtils.rm_rf(@build_dir)
+    FileUtils.rm_rf(@output_dir)
   end
 
   it 'should build a vsphere stemcell' do
     Dir.mktmpdir('vsphere-stemcell-test') do |tmpdir|
-      output_dir = File.join(tmpdir, 'vsphere')
       os_version = 'some-os-version'
       version = 'some-version'
       agent_commit = 'some-agent-commit'
@@ -40,7 +42,6 @@ describe 'VSphere' do
       ENV['ORGANIZATION'] = 'organization'
 
       ENV['OS_VERSION'] = os_version
-      ENV['OUTPUT_DIR'] = output_dir
       ENV['PATH'] = "#{File.join(@build_dir, '..', 'spec', 'fixtures', 'vsphere')}:#{ENV['PATH']}"
 
       FileUtils.mkdir_p(File.join(@build_dir, 'compiled-agent'))
@@ -74,7 +75,7 @@ describe 'VSphere' do
         .and_return(s3_vmx)
 
       Rake::Task['build:vsphere'].invoke
-      stemcell = File.join(output_dir, "bosh-stemcell-#{version}-vsphere-esxi-#{os_version}-go_agent.tgz")
+      stemcell = File.join(@output_dir, "bosh-stemcell-#{version}-vsphere-esxi-#{os_version}-go_agent.tgz")
 
       stemcell_manifest = YAML.load(read_from_tgz(stemcell, 'stemcell.MF'))
       expect(stemcell_manifest['version']).to eq(version)

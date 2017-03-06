@@ -33,7 +33,7 @@ namespace :build do
       num_vcpus: ENV.fetch('NUM_VCPUS', '6'),
       agent_commit: agent_commit,
       os: ENV.fetch("OS_VERSION"),
-      output_dir: "bosh-window-stemcell",
+      output_dir: "bosh-windows-stemcell",
       packer_vars: {},
       version: version
     )

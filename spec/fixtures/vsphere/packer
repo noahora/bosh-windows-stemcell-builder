@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 
-OUTPUT_DIR = ENV.fetch("OUTPUT_DIR")
-Dir.chdir(OUTPUT_DIR) do
+require 'fileutils'
+require 'json'
+
+packer_config = ARGV.last
+content = File.read(packer_config)
+output_dir = JSON.parse(content)['builders'][0]['output_directory']
+FileUtils.mkdir_p(output_dir)
+Dir.chdir(output_dir) do
   File.write("file.vmx", "banana")
 end
