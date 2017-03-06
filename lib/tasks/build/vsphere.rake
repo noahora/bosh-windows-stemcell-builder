@@ -29,7 +29,7 @@ namespace :build do
       product_key: ENV.fetch("PRODUCT_KEY"),
       owner: ENV.fetch("OWNER"),
       organization: ENV.fetch("ORGANIZATION"),
-      mem_size: ENV.fetch('MEM_SIZE', '9241'),
+      mem_size: ENV.fetch('MEM_SIZE', '4096'),
       num_vcpus: ENV.fetch('NUM_VCPUS', '6'),
       agent_commit: agent_commit,
       os: ENV.fetch("OS_VERSION"),
