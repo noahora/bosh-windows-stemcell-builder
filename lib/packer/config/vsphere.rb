@@ -27,6 +27,7 @@ module Packer
             'winrm_password' => @administrator_password,
             'winrm_timeout' => '5m',
             'winrm_insecure' => true,
+            'vm_name' =>  'packer-vmx',
             'shutdown_command' => "C:\\Windows\\System32\\shutdown.exe /s",
             'shutdown_timeout' => '1h',
             'vmx_data' => {
@@ -80,6 +81,7 @@ module Packer
           'winrm_password' => @administrator_password,
           'winrm_timeout' => '8m',
           'winrm_insecure' => true,
+          'vm_name' =>  'packer-vmx',
           'vmx_data' => {
             'memsize' => @mem_size.to_s,
             'numvcpus' => @num_vcpus.to_s
