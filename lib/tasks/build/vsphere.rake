@@ -26,7 +26,6 @@ namespace :build do
       source_path: source_path,
       mem_size: ENV.fetch('MEM_SIZE', '4096'),
       num_vcpus: ENV.fetch('NUM_VCPUS', '6'),
-      os: ENV.fetch("OS_VERSION"),
       output_directory: "bosh-windows-stemcell",
       packer_vars: {},
     )
