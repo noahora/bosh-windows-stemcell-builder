@@ -3,13 +3,13 @@ require 'securerandom'
 module Packer
   module Config
     class VSphereBase < Base
-      def initialize(administrator_password, source_path, output_directory,
-                     memsize, numvcpus)
+      def initialize(administrator_password:, source_path:, output_directory:,
+                     mem_size:, num_vcpus:)
         @administrator_password = administrator_password
         @source_path = source_path
         @output_directory = output_directory
-        @mem_size = memsize
-        @num_vcpus = numvcpus
+        @mem_size = mem_size
+        @num_vcpus = num_vcpus
       end
     end
 
@@ -60,11 +60,11 @@ module Packer
     end
 
     class VSphere < VSphereBase
-      def initialize(product_key,owner,organization,*args)
+      def initialize(product_key:,owner:,organization:,**args)
         @product_key = product_key
         @owner = owner
         @organization = organization
-        super(*args)
+        super(args)
       end
       def builders
         [

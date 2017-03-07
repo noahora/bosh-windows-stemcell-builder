@@ -13,7 +13,8 @@ params:
   ADMINISTRATOR_PASSWORD: replace-me
 
   INPUT_BUCKET: "bosh-windows-stemcell-vmx"
-  VMX_CACHE: "C:\\vmx-data"
+  OUTPUT_BUCKET: "bosh-windows-stemcell-vmx"
+  VMX_CACHE_DIR: "C:\\vmx-data"
 
 run:
   path: ruby.exe

@@ -15,6 +15,11 @@ module Stemcell
     end
 
     class VSphereAddUpdates < VSphereBase
+      def initialize(**args)
+        args[:agent_commit] = ""
+        args[:version] = ""
+        super(args)
+      end
       def build
         run_packer
       end
@@ -22,8 +27,11 @@ module Stemcell
       private
       def packer_config
         Packer::Config::VSphereAddUpdates.new(
-          @administrator_password, @source_path,
-          @output_dir, @mem_size, @num_vcpus
+          administrator_password: @administrator_password,
+          source_path: @source_path,
+          output_directory: @output_directory,
+          mem_size: @mem_size,
+          num_vcpus: @num_vcpus
         ).dump
       end
     end
@@ -38,7 +46,7 @@ module Stemcell
 
       def build
         run_packer
-        image_path, sha = create_image(@output_dir)
+        image_path, sha = create_image(@output_directory)
         manifest = Manifest::VSphere.new(@version, sha, @os).dump
         super(iaas: 'vsphere-esxi', is_light: false, image_path: image_path, manifest: manifest)
       end
@@ -46,9 +54,14 @@ module Stemcell
       private
       def packer_config
         Packer::Config::VSphere.new(
-          @administrator_password, @source_path,
-          @output_dir, @mem_size, @num_vcpus,
-          @product_key,@owner, @organization
+          administrator_password: @administrator_password,
+          source_path: @source_path,
+          output_directory: @output_directory,
+          mem_size: @mem_size,
+          num_vcpus: @num_vcpus,
+          product_key: @product_key,
+          owner: @owner,
+          organization: @organization
         ).dump
       end
 

@@ -19,7 +19,7 @@ namespace :build do
       account_json: ENV.fetch("ACCOUNT_JSON"),
       agent_commit: agent_commit,
       os: ENV.fetch("OS_VERSION"),
-      output_dir: ENV.fetch("OUTPUT_DIR"),
+      output_directory: ENV.fetch("OUTPUT_DIR"),
       packer_vars: {},
       source_image: base_image,
       version: version

@@ -1,11 +1,11 @@
 require 'stemcell/builder'
 
 describe Stemcell::Builder do
-  output_dir = ''
+  output_directory = ''
 
   around(:each) do |example|
     Dir.mktmpdir do |dir|
-      output_dir = dir
+      output_directory = dir
       example.run
     end
   end
@@ -32,8 +32,11 @@ describe Stemcell::Builder do
         allow(packer_config).to receive(:dump).and_return(config)
 
         allow(Packer::Config::VSphereAddUpdates).to receive(:new).with(
-          administrator_password, source_path,
-          output_dir, mem_size, num_vcpus).and_return(packer_config)
+          administrator_password: administrator_password,
+          source_path: source_path,
+          output_directory: output_directory,
+          mem_size: mem_size,
+          num_vcpus: num_vcpus).and_return(packer_config)
 
         Stemcell::Builder::VSphereAddUpdates.new(
           os: os,
@@ -43,7 +46,7 @@ describe Stemcell::Builder do
           administrator_password: administrator_password,
           mem_size: mem_size,
           num_vcpus: num_vcpus,
-          output_dir: output_dir,
+          output_directory: output_directory,
           packer_vars: packer_vars
         ).build
         expect(packer_runner).to have_received(:run).with(command, packer_vars)
@@ -70,8 +73,11 @@ describe Stemcell::Builder do
           allow(packer_config).to receive(:dump).and_return(config)
 
           allow(Packer::Config::VSphereAddUpdates).to receive(:new).with(
-            administrator_password,
-            source_path, output_dir, mem_size, num_vcpus).and_return(packer_config)
+            administrator_password: administrator_password,
+            source_path: source_path,
+            output_directory: output_directory,
+            mem_size: mem_size,
+            num_vcpus: num_vcpus).and_return(packer_config)
 
           expect {
             Stemcell::Builder::VSphereAddUpdates.new(
@@ -82,7 +88,7 @@ describe Stemcell::Builder do
               administrator_password: administrator_password,
               mem_size: mem_size,
               num_vcpus: num_vcpus,
-              output_dir: output_dir,
+              output_directory: output_directory,
               packer_vars: packer_vars
             ).build }.to raise_error(Stemcell::Builder::PackerFailure)
         end
@@ -124,9 +130,14 @@ describe Stemcell::Builder do
         allow(packer_config).to receive(:dump).and_return(config)
 
         allow(Packer::Config::VSphere).to receive(:new).with(
-          administrator_password,
-          source_path, output_dir, mem_size, num_vcpus, product_key,
-          owner, organization).and_return(packer_config)
+          administrator_password: administrator_password,
+          source_path: source_path,
+          output_directory: output_directory,
+          mem_size: mem_size,
+          num_vcpus: num_vcpus,
+          product_key: product_key,
+          owner: owner,
+          organization: organization).and_return(packer_config)
 
         vsphere_manifest = double(:vsphere_manifest)
         allow(vsphere_manifest).to receive(:dump).and_return(manifest_contents)
@@ -144,12 +155,12 @@ describe Stemcell::Builder do
           image_path: image,
           manifest: manifest_contents,
           apply_spec: apply_spec_contents,
-          output_dir: output_dir
+          output_directory: output_directory
         ).and_return('path-to-stemcell')
 
         builder = Stemcell::Builder::VSphere.new(
           os: os,
-          output_dir: output_dir,
+          output_directory: output_directory,
           version: version,
           agent_commit: agent_commit,
           packer_vars: packer_vars,
@@ -189,14 +200,19 @@ describe Stemcell::Builder do
           allow(packer_config).to receive(:dump).and_return(config)
 
           allow(Packer::Config::VSphere).to receive(:new).with(
-            administrator_password,
-            source_path, output_dir, mem_size, num_vcpus, product_key,
-            owner, organization).and_return(packer_config)
+            administrator_password: administrator_password,
+            source_path: source_path,
+            output_directory: output_directory,
+            mem_size: mem_size,
+            num_vcpus: num_vcpus,
+            product_key: product_key,
+            owner: owner,
+            organization: organization).and_return(packer_config)
 
           expect {
             Stemcell::Builder::VSphere.new(
               os: os,
-              output_dir: output_dir,
+              output_directory: output_directory,
               version: version,
               agent_commit: agent_commit,
               packer_vars: packer_vars,

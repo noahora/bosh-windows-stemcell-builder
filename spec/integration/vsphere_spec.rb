@@ -12,15 +12,57 @@ describe 'VSphere' do
   before(:each) do
     @original_env = ENV.to_hash
     @build_dir = File.expand_path('../../../build', __FILE__)
-    @output_dir = 'bosh-windows-stemcell'
+    @output_directory = 'bosh-windows-stemcell'
     FileUtils.mkdir_p(@build_dir)
-    FileUtils.rm_rf(@output_dir)
+    FileUtils.rm_rf(@output_directory)
   end
 
   after(:each) do
     ENV.replace(@original_env)
     FileUtils.rm_rf(@build_dir)
-    FileUtils.rm_rf(@output_dir)
+    FileUtils.rm_rf(@output_directory)
+  end
+  it 'should build a vsphere_add_updates vmx' do
+    Dir.mktmpdir('vsphere-vmx-test') do |tmpdir|
+      os_version = 'some-os-version'
+
+      ENV['AWS_ACCESS_KEY_ID']= 'some-key'
+      ENV['AWS_SECRET_ACCESS_KEY'] = 'secret-key'
+      ENV['AWS_REGION'] = 'some-region'
+      ENV['INPUT_BUCKET'] = 'input-vmx-bucket'
+      ENV['VMX_CACHE_DIR'] = '/tmp'
+      ENV['OUTPUT_BUCKET'] = 'stemcell-output-bucket'
+
+      ENV['ADMINISTRATOR_PASSWORD'] = 'pass'
+
+      ENV['OS_VERSION'] = os_version
+      ENV['PATH'] = "#{File.join(@build_dir, '..', 'spec', 'fixtures', 'vsphere')}:#{ENV['PATH']}"
+
+      FileUtils.mkdir_p(File.join(@build_dir, 'vmx-version'))
+      File.write(
+        File.join(@build_dir, 'vmx-version', 'number'),
+        'some-vmx-version'
+      )
+
+
+      s3_vmx= double(:s3_vmx)
+      allow(s3_vmx).to receive(:fetch).and_return("1234")
+
+      allow(S3::Vmx).to receive(:new).with(
+        aws_access_key_id: 'some-key',
+        aws_secret_access_key: 'secret-key',
+        aws_region: 'some-region',
+        input_bucket: 'input-vmx-bucket',
+        output_bucket: 'stemcell-output-bucket',
+        vmx_cache_dir: '/tmp')
+        .and_return(s3_vmx)
+
+      Rake::Task['build:vsphere_add_updates'].invoke
+      pattern = File.join(@output_directory, "*.vmx").gsub('\\', '/')
+      files = Dir.glob(pattern)
+      expect(files.length).to eq(1)
+      expect(files[0]).to eq(File.join(@output_directory,"file.vmx"))
+    end
   end
 
   it 'should build a vsphere stemcell' do
@@ -75,7 +117,7 @@ describe 'VSphere' do
         .and_return(s3_vmx)
 
       Rake::Task['build:vsphere'].invoke
-      stemcell = File.join(@output_dir, "bosh-stemcell-#{version}-vsphere-esxi-#{os_version}-go_agent.tgz")
+      stemcell = File.join(@output_directory, "bosh-stemcell-#{version}-vsphere-esxi-#{os_version}-go_agent.tgz")
 
       stemcell_manifest = YAML.load(read_from_tgz(stemcell, 'stemcell.MF'))
       expect(stemcell_manifest['version']).to eq(version)

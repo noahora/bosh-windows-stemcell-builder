@@ -4,9 +4,9 @@ module Stemcell
     end
 
     class Base
-      def initialize(os:, output_dir:, version:, agent_commit:, packer_vars:)
+      def initialize(os:, output_directory:, version:, agent_commit:, packer_vars:)
         @os = os
-        @output_dir = output_dir
+        @output_directory = output_directory
         @version = version
         @agent_commit = agent_commit
         @packer_vars = packer_vars
@@ -22,7 +22,7 @@ module Stemcell
           image_path: image_path,
           manifest: manifest,
           apply_spec: apply_spec,
-          output_dir: @output_dir
+          output_directory: @output_directory
         )
       end
 
