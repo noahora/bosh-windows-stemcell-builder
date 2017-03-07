@@ -44,8 +44,8 @@ module Packer
         restart_provisioner = Provisioners::VMX_WINDOWS_RESTART.clone
 
         command = restart_provisioner['restart_command']
-        if !command.nil? && !command.index('administrator_password').nil?
-          restart_provisioner['restart_command'] = command.sub('administrator_password', @administrator_password)
+        if !command.nil? && !command.index('ADMINISTRATOR_PASSWORD').nil?
+          restart_provisioner['restart_command'] = command.sub('ADMINISTRATOR_PASSWORD', @administrator_password)
         end
 
         [
