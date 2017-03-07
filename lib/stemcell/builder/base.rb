@@ -1,3 +1,5 @@
+STDOUT.sync = true
+
 module Stemcell
   class Builder
     class PackerFailure < RuntimeError
