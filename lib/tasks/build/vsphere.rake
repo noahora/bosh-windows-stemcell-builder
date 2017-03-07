@@ -25,7 +25,7 @@ namespace :build do
       administrator_password: ENV.fetch("ADMINISTRATOR_PASSWORD"),
       source_path: source_path,
       mem_size: ENV.fetch('MEM_SIZE', '4096'),
-      num_vcpus: ENV.fetch('NUM_VCPUS', '6'),
+      num_vcpus: ENV.fetch('NUM_VCPUS', '8'),
       output_directory: "bosh-windows-stemcell",
       packer_vars: {},
     )
@@ -65,7 +65,7 @@ namespace :build do
       owner: ENV.fetch("OWNER"),
       organization: ENV.fetch("ORGANIZATION"),
       mem_size: ENV.fetch('MEM_SIZE', '4096'),
-      num_vcpus: ENV.fetch('NUM_VCPUS', '6'),
+      num_vcpus: ENV.fetch('NUM_VCPUS', '8'),
       agent_commit: agent_commit,
       os: ENV.fetch("OS_VERSION"),
       output_directory: "bosh-windows-stemcell",
