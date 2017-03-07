@@ -1,4 +1,4 @@
-- Install VMWare workstation
+- Install VMWare workstation (> version 12 Pro)
 - Create a new Virtual Machine 
   - Custom Advanced
   - Select Worksation 9.0 Compatibility
@@ -27,5 +27,6 @@
 - Unselect "Connect at power on"
 - Click Ok
 - Start the new VM
-
-
+- Run `scripts/setup-winrm.ps1`
+- Shut down the VM
+- Everything under the base vm folder (packer-vmx.vmx, ....) is now the source for starting the pipeline
