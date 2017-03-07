@@ -21,7 +21,6 @@ params:
   AWS_REGION: us-east-1
 
   ADMINISTRATOR_PASSWORD: replace-me
-  OUTPUT_DIR:
   OS_VERSION: windows2012R2
 
   INPUT_BUCKET: "bosh-windows-stemcell-vmx"
