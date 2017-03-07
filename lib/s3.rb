@@ -53,6 +53,16 @@ module S3
       find_vmx_file(vmx_dir)
     end
 
+    def put(vmx_dir, version)
+      version = version.scan(/(\d+)\./).flatten.first
+      version = (version.to_i + 1).to_s
+      vmx_tarball = File.join(@vmx_cache_dir,"vmx-v#{version}.tgz")
+      Dir.chdir(vmx_dir) do
+        exec_command("tar -czvf #{vmx_tarball} *")
+      end
+      @client.put(@output_bucket, "vmx-v#{version}.tgz", vmx_tarball)
+    end
+
     private
 
     def find_vmx_file(dir)

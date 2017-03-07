@@ -8,7 +8,8 @@ namespace :build do
 
     vmx_version = File.read(File.join(build_dir, 'vmx-version', 'number')).chomp
 
-    FileUtils.rm_rf("bosh-windows-stemcell")
+    output_directory = File.absolute_path("bosh-windows-stemcell")
+    FileUtils.rm_rf(output_directory)
 
     vmx = S3::Vmx.new(
       aws_access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID"),
@@ -26,12 +27,13 @@ namespace :build do
       source_path: source_path,
       mem_size: ENV.fetch('MEM_SIZE', '4096'),
       num_vcpus: ENV.fetch('NUM_VCPUS', '8'),
-      output_directory: "bosh-windows-stemcell",
+      output_directory: output_directory,
       packer_vars: {},
     )
 
     begin
       vsphere.build
+      vmx.put(output_directory, vmx_version)
     rescue => e
       puts "Failed to build stemcell: #{e.message}"
       puts e.backtrace

@@ -45,7 +45,7 @@ describe Packer::Config do
         ).provisioners
 
         restart_provisioner = Packer::Config::Provisioners::VMX_WINDOWS_RESTART
-        restart_provisioner['restart_command'] = restart_provisioner['restart_command'].sub!('ADMINISTRATOR_PASSWORD', 'administrator_password')
+        restart_provisioner['restart_command'] = restart_provisioner['restart_command'].sub!('ADMINISTRATOR_PASSWORD', 'password')
 
         expect(provisioners).to eq(
           [
