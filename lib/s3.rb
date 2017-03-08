@@ -6,6 +6,7 @@ module S3
       Aws.use_bundled_cert!
       credentials =  Aws::Credentials.new(aws_access_key_id, aws_secret_access_key)
       @s3 = Aws::S3::Client.new(region: aws_region, credentials: credentials)
+      @s3_resource = Aws::S3::Resource.new(region: aws_region, credentials: credentials)
     end
     def get(bucket,key,file_name)
       puts "Downloading the #{key} from #{bucket} to #{file_name}"
@@ -16,7 +17,7 @@ module S3
     end
     def put(bucket,key,file_name)
       puts "Uploading the #{file_name} to #{bucket}:#{key}"
-      @s3.bucket(bucket).object(key).upload_file(file_name)
+      @s3_resource.bucket(bucket).object(key).upload_file(file_name)
       puts "Finished uploading the #{file_name} to #{bucket}:#{key}"
     end
   end
