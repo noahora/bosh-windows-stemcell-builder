@@ -79,7 +79,7 @@ namespace :build do
 
     begin
       vsphere.build
-      s3_client = S3::Vmx.new(
+      s3_client = S3::Client.new(
         aws_access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID"),
         aws_secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY"),
         aws_region: ENV.fetch("AWS_REGION"),
