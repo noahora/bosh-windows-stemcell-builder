@@ -54,7 +54,6 @@ module Packer
           Provisioners::VMX_AUTORUN_UPDATES,
           Provisioners::VMX_POWERSHELLUTILS,
           Provisioners::VMX_PSWINDOWSUPDATE,
-          restart_provisioner,
           Provisioners::VMX_READ_UPDATE_LOG
         ]
       end

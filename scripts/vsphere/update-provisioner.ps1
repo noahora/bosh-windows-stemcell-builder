@@ -62,6 +62,7 @@ function Install-Updates() {
     for ($i = 0; $i -le $maxAttempts; $i++) {
         try {
             $updateResult = Get-WUInstall -MicrosoftUpdate -AutoReboot -AcceptAll -IgnoreUserInput -Debuger -Category $UpdateCategories -NotCategory $IgnoredUpdateCategories
+            LogWrite $UpdateLog "return value from get-wuinstall: ${updateResult}"
             return $updateResult
         } catch {
             if ($_ -match "HRESULT: 0x8024402C") {
