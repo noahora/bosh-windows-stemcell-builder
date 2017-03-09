@@ -19,10 +19,7 @@ outputs:
   - name: sha
 
 run:
-  path: /bin/bash
-  args:
-    - '-c'
-    - 'stemcell-builder/scripts/create-aws-stemcell.rb'
+  path: stemcell-builder/scripts/create-aws-stemcell.rb
 
 params:
   OUTPUT_DIR:
