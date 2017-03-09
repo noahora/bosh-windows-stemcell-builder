@@ -9,13 +9,9 @@ image_resource:
 inputs:
   - name: stemcell-builder
   - name: base-amis
-    path: stemcell-builder/build/base-amis
   - name: compiled-agent
-    path: stemcell-builder/build/compiled-agent
   - name: version
-    path: stemcell-builder/build/version
   - name: windows-stemcell-dependencies
-    path: stemcell-builder/build/windows-stemcell-dependencies
 
 outputs:
   - name: bosh-windows-stemcell
@@ -23,7 +19,10 @@ outputs:
   - name: sha
 
 run:
-  path: stemcell-builder/scripts/create-aws-stemcell.rb
+  path: /bin/bash
+  args:
+    - '-c'
+    - 'stemcell-builder/scripts/create-aws-stemcell.rb'
 
 params:
   OUTPUT_DIR:
