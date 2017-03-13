@@ -42,16 +42,21 @@ function EnableMicrosoftUpdates {
 
     LogWrite $UpdateLog "EnableMicrosoftUpdates: enabling Microsoft Update ServiceManager"
 
-    # If the service is not running this errors.
-    net stop wuauserv
+    # New way
+    Add-WUServiceManager -ServiceID 7971f918-a847-4430-9279-4a52d1efe18d -Confirm:$false
 
-    $scriptPath = "${env:TEMP}\enable-microsoft-updates.vbs"
-    cmd.exe /C ('echo Set ServiceManager = CreateObject("Microsoft.Update.ServiceManager") > {0}' -f $scriptPath)
-    cmd.exe /C ('echo Set NewUpdateService = ServiceManager.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"") >> {0}' -f $scriptPath)
-    cscript.exe $scriptPath
+    # Old way
+    # # If the service is not running this errors.
+    # net stop wuauserv
 
-    # If the service is running this errors.
-    net start wuauserv
+    # $scriptPath = "${env:TEMP}\enable-microsoft-updates.vbs"
+    # LogWrite "scriptPath: ${scriptPath}"
+    # cmd.exe /C ('echo Set ServiceManager = CreateObject("Microsoft.Update.ServiceManager") > {0}' -f $scriptPath)
+    # cmd.exe /C ('echo Set NewUpdateService = ServiceManager.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"") >> {0}' -f $scriptPath)
+    # cscript.exe $scriptPath
+
+    # # If the service is running this errors.
+    # net start wuauserv
 }
 
 function Install-Updates() {
