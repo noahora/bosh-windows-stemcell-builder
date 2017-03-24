@@ -11,7 +11,7 @@ module Stemcell
       def build
         image_url = run_packer
         manifest = Manifest::Gcp.new(@version, @os, image_url).dump
-        update_list = File.join(@output_directory, 'updates.txt')
+        update_list = File.join(@output_directory, 'updates', 'updates.txt')
         super(iaas: 'google-kvm', is_light: true, image_path: '', manifest: manifest, update_list: update_list)
       end
 

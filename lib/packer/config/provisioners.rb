@@ -43,7 +43,7 @@ module Packer
           {
             'type' => 'file',
             'source' => 'C:\\updates.txt',
-            'destination' => File.join(dest, 'updates.txt'),
+            'destination' => File.join(dest, 'updates', 'updates.txt'),
             'direction' => 'download'
           },
           {
