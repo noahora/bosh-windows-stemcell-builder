@@ -133,12 +133,13 @@ describe Packer::Config do
             Packer::Config::Provisioners.install_agent("vsphere"),
             Packer::Config::Provisioners::INSTALL_CF_FEATURES,
             Packer::Config::Provisioners::CLEANUP_WINDOWS_FEATURES,
+            Packer::Config::Provisioners.download_windows_updates('output_directory'),
             Packer::Config::Provisioners::DISABLE_SERVICES,
             Packer::Config::Provisioners::SET_FIREWALL,
             Packer::Config::Provisioners::CLEANUP_TEMP_DIRS,
             Packer::Config::Provisioners::CLEANUP_ARTIFACTS,
             Packer::Config::Provisioners::COMPRESS_DISK
-          ]
+          ].flatten
         )
       end
     end
