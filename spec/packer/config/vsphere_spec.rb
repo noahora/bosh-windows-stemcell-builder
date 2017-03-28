@@ -101,7 +101,8 @@ describe Packer::Config do
             'numvcpus' => '1',
             'displayname' => "packer-vmx-#{Time.now.getutc.to_i}"
           },
-          'output_directory' => 'output_directory'
+          'output_directory' => 'output_directory',
+          'skip_clean_files' => true
         )
       end
     end

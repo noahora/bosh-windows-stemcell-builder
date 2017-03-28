@@ -41,14 +41,14 @@ module Packer
       def self.download_windows_updates(dest)
         return [
           {
-            'type' => 'file',
-            'source' => 'C:\\updates.txt',
-            'destination' => File.join(dest, 'updates', 'updates.txt'),
-            'direction' => 'download'
+            'type' => 'powershell',
+            'inline' => 'List-Updates | Out-File -FilePath "C:\\updates.txt" -Encoding ASCII'
           },
           {
-            'type' => 'powershell',
-            'inline' => 'List-Updates | Out-File "C:\\updates.txt"'
+            'type' => 'file',
+            'source' => 'C:\\updates.txt',
+            'destination' => File.join(dest, 'updates.txt'),
+            'direction' => 'download'
           }
         ]
       end
