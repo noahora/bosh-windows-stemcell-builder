@@ -6,7 +6,7 @@ require 'tempfile'
 
 # ROOTPATH = File.join(File.dirname(__FILE__), '../../../')
 
-require_relative File.join(ROOTPATH, 'lib', 'exec_command.rb')
+#require_relative File.join(ROOTPATH, 'lib', 'exec_command.rb')
 
 # def install_ginkgo
 #   ginkgo_dir = File.join(
@@ -73,7 +73,7 @@ require_relative File.join(ROOTPATH, 'lib', 'exec_command.rb')
 namespace :run do
   desc 'Run bosh-windows-acceptance-tests (BWATS)'
   task :bwats do |t|
-    check_environment
+    # check_environment
 
     # ENV['GOPATH'] = ROOTPATH # bosh-windows-stemcell-builder
 
