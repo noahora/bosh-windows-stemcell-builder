@@ -47,7 +47,6 @@ def setup_gcp_ssh_tunnel
     job = fork do
       exec_command("gcloud compute ssh --quiet bosh-bastion --zone=us-east1-d --project=#{project_id} -- -f -N -L 25555:#{ENV['BOSH_PRIVATE_IP']}:25555")
     end
-    Process.detach(job)
 
     tries = 0
     while true
@@ -56,7 +55,7 @@ def setup_gcp_ssh_tunnel
         raise 'failed to create SSH tunnel'
       end
       if port_open?(25555)
-        puts 'SSH tunnel succeeded'
+        puts "SSH tunnel succeeded: pid:#{job}"
         return job
       end
       tries += 1
@@ -88,8 +87,9 @@ namespace :run do
       ENV["GOPATH"] = root_dir
       exec_command("#{ginkgo} -r -v #{test_path}")
     ensure
+      puts "Running ensure: #{job}"
       if job != ""
-        Process.kill "TERM", job
+        Process.kill 9, job
         Process.wait job
       end
     end
