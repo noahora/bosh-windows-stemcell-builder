@@ -57,7 +57,7 @@ def setup_gcp_ssh_tunnel
       end
       if port_open?(25555)
         puts 'SSH tunnel succeeded'
-        break
+        return job
       end
       tries += 1
       sleep 15
@@ -69,21 +69,29 @@ namespace :run do
   desc 'Run bosh-windows-acceptance-tests (BWATS)'
   task :bwats, [:iaas] do |t, args|
     if args[:iaas] == 'gcp'
-      setup_gcp_ssh_tunnel
+      job = setup_gcp_ssh_tunnel
     else
+      job = ""
       puts "ignoring IAAS environment key: #{ENV['IAAS']}"
     end
 
-    root_dir = File.expand_path('../../../..', __FILE__)
-    build_dir = File.join(root_dir,'build')
+    begin
+      root_dir = File.expand_path('../../../..', __FILE__)
+      build_dir = File.join(root_dir,'build')
 
-    ginkgo = File.join(build_dir, windows? ? 'gingko.exe' : 'ginkgo')
-    test_path = File.join(
-      root_dir, 'src', 'github.com', 'cloudfoundry-incubator',
-      'bosh-windows-acceptance-tests'
-    )
-    ENV["CONFIG_JSON"] = args.extras[0] || File.join(build_dir,"config.json")
-    ENV["GOPATH"] = root_dir
-    exec_command("#{ginkgo} -r -v #{test_path}")
+      ginkgo = File.join(build_dir, windows? ? 'gingko.exe' : 'ginkgo')
+      test_path = File.join(
+        root_dir, 'src', 'github.com', 'cloudfoundry-incubator',
+        'bosh-windows-acceptance-tests'
+      )
+      ENV["CONFIG_JSON"] = args.extras[0] || File.join(build_dir,"config.json")
+      ENV["GOPATH"] = root_dir
+      exec_command("#{ginkgo} -r -v #{test_path}")
+    ensure
+      if job != ""
+        Process.kill "TERM", job
+        Process.wait job
+      end
+    end
   end
 end
