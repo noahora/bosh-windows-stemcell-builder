@@ -44,14 +44,15 @@ def setup_gcp_ssh_tunnel
     exec_command("gcloud auth activate-service-account --quiet #{account_email} --key-file #{f.path}")
 
     FileUtils.mkdir_p("/root/.ssh")
-    job = fork do
-      exec_command("gcloud compute ssh --quiet bosh-bastion --zone=us-east1-d --project=#{project_id} -- -f -N -L 25555:#{ENV['BOSH_PRIVATE_IP']}:25555")
+    job = {}
+    fork do
+      job = exec_command("gcloud compute ssh --quiet bosh-bastion --zone=us-east1-d --project=#{project_id} -- -f -N -L 25555:#{ENV['BOSH_PRIVATE_IP']}:25555")
     end
 
     tries = 0
     while true
       if tries > 3
-        Process.kill 9,job
+        Process.kill("KILL", job.pid)
         raise 'failed to create SSH tunnel'
       end
       if port_open?(25555)
@@ -89,7 +90,7 @@ namespace :run do
     ensure
       puts "Running ensure: #{job}"
       if job != ""
-        Process.kill 9, job
+        Process.kill("TERM", job.pid)
         Process.wait job
       end
     end
