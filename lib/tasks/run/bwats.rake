@@ -85,10 +85,12 @@ namespace :run do
       ENV["GOPATH"] = root_dir
       exec_command("#{ginkgo} -r -v #{test_path}")
     ensure
-      puts "Running ensure: #{job}"
       if job != ""
-        Process.kill("TERM", job)
+        puts "Running ensure: #{job}"
+        Process.kill("KILL", job)
+        puts "wait: #{job}"
         Process.wait job
+        puts "done: #{job}"
       end
     end
   end
