@@ -26,6 +26,11 @@ rescue Timeout::Error
   false
 end
 
+def killPid(cmd)
+  pid=`pidof #{cmd}`
+  puts "#{cmd} PID: #{pid}"
+  Process.kill "USR2", pid.to_i
+end
 
 def setup_gcp_ssh_tunnel
   throw "GCP tests must be run on linux" if windows?
@@ -44,7 +49,9 @@ def setup_gcp_ssh_tunnel
     exec_command("gcloud auth activate-service-account --quiet #{account_email} --key-file #{f.path}")
 
     FileUtils.mkdir_p("/root/.ssh")
-    job = Process.spawn("gcloud compute ssh --quiet bosh-bastion --zone=us-east1-d --project=#{project_id} -- -f -N -L 25555:#{ENV['BOSH_PRIVATE_IP']}:25555")
+    job = fork do
+      exec("gcloud compute ssh --quiet bosh-bastion --zone=us-east1-d --project=#{project_id} -- -f -N -L 25555:#{ENV['BOSH_PRIVATE_IP']}:25555")
+    end
 
     tries = 0
     while true
@@ -87,10 +94,7 @@ namespace :run do
     ensure
       if job != ""
         puts "Running ensure: #{job}"
-        Process.kill("KILL", job)
-        puts "wait: #{job}"
-        Process.wait job
-        puts "done: #{job}"
+        killPid("ssh")
       end
     end
   end
