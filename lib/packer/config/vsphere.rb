@@ -88,7 +88,7 @@ module Packer
       def provisioners
         ( Base.instance_method(:pre_provisioners).bind(self).call <<
         [
-          Provisioners::TEST_INSTALLED_UPDATES,
+          # Provisioners::TEST_INSTALLED_UPDATES,
           Provisioners::lgpo_exe,
           Provisioners.install_agent('vsphere').freeze,
           Provisioners.download_windows_updates(@output_directory).freeze,
