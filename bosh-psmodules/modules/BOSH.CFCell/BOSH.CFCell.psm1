@@ -15,6 +15,7 @@ function Install-CFFeatures {
     WindowsFeatureInstall("AS-NET-Framework")
     WindowsFeatureInstall("Web-WHC")
     WindowsFeatureInstall("Web-ASP")
+    WindowsFeatureInstall("Net-Framework-Core")
 
     Write-Log "Installed CloudFoundry Cell Windows Features"
 }
