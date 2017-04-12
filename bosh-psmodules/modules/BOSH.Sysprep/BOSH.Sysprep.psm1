@@ -180,7 +180,7 @@ function Invoke-Sysprep() {
       }
       "vsphere" {
          Create-Unattend -NewPassword $NewPassword -ProductKey $ProductKey -Organization $Organization -Owner $Owner
-         C:/windows/system32/sysprep/sysprep.exe /generalize /oobe /unattend:"C:/Windows/Panther/Unattend/unattend.xml" /quiet /shutdown
+         C:/windows/system32/sysprep/sysprep.exe /generalize /oobe /unattend:"C:/Windows/Panther/Unattend/unattend.xml" /quiet /quit
       }
       Default { Throw "Invalid IaaS '${IaaS}' supported platforms are: AWS, Azure, GCP and Vsphere" }
    }
