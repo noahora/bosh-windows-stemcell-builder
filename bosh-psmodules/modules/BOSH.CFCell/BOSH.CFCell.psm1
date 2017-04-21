@@ -31,7 +31,7 @@ function Protect-CFCell {
   Write-Log "Getting WinRM config"
   $winrm_config = & cmd.exe /c 'winrm get winrm/config'
   Write-Log "$winrm_config"
-  disable-service("WinRM")
+  # disable-service("WinRM")
   disable-service("W3Svc")
   set-firewall
   Write-Log "Getting WinRM config"
