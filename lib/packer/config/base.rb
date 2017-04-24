@@ -15,7 +15,6 @@ module Packer
       def self.post_provisioners(iaas)
         provisioners = [
           Provisioners::OPTIMIZE_DISK,
-          Provisioners::COMPRESS_DISK,
           Provisioners::CLEAR_PROVISIONER
         ]
 
