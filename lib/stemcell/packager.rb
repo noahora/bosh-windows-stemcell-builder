@@ -1,5 +1,7 @@
 require 'zlib'
 require 'rubygems/package'
+require 'fileutils'
+require 'pry'
 
 module Stemcell
   class Packager
@@ -99,6 +101,7 @@ module Stemcell
       Dir.mktmpdir do |dir|
         exec_command("tar -xf #{ova_file_name} -C #{dir}")
 
+        # modify ovf
         ovf_file = File.open(find_ovf_file(dir))
         f = Nokogiri::XML(ovf_file)
         nics = f.css("VirtualHardwareSection Item").select { |x| x.to_s =~ /Ethernet/i }
@@ -107,22 +110,32 @@ module Stemcell
         end
         File.write(ovf_file, f.to_s)
         ovf_file.close
+
         Dir.chdir(dir) do
-          exec_command("tar -cf #{ova_file_name} *")
+          binding.pry
+          mf_file = find_file_by_ext('mf', dir)
+          FileUtils.rm(mf_file)
+          ovf_file = find_file_by_ext('ovf', dir)
+          exec_command("ovftool #{ovf_file} new_ova.ova")
+          FileUtils.mv('new_ova.ova', ova_file_name)
         end
       end
     end
 
-    def self.find_ovf_file(dir)
-      pattern = File.join(dir, "*.ovf").gsub('\\', '/')
+    def self.find_file_by_ext(ext, dir)
+      pattern = File.join(dir, "*.#{ext}").gsub('\\', '/')
       files = Dir.glob(pattern)
       if files.length == 0
-        raise "No ovf files in directory: #{dir}"
+        raise "No #{ext} files in directory: #{dir}"
       end
       if files.length > 1
-        raise "Too many ovf files in directory: #{files}"
+        raise "Too many #{ext} files in directory: #{files}"
       end
       return files[0]
+    end
+
+    def self.find_ovf_file(dir)
+      find_file_by_ext('ovf', dir)
     end
 
     def self.exec_command(cmd)
