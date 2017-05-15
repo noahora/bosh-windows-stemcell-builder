@@ -63,7 +63,7 @@ installed.
 ### For VMware Workstation:
 
 - Install VMWare workstation (> version 12 Pro)
-- Create a new Virtual Machine 
+- Create a new Virtual Machine
   - Custom Advanced
   - Select Worksation 9.x Compatibility
   - Select "I will install operating system later"
@@ -74,7 +74,7 @@ installed.
   - Adjust the appropriate memory
   - Select the correct Network Type (NAT)
   - LSI logic SAS Contoller Type
-  - SCSI Disk Type 
+  - SCSI Disk Type
   - Create a new virtual Disk
   - Adjust the size (Default 60GB) and Store virtual disk as a single file
   - Before finishing, select Customize Hardware:
@@ -104,7 +104,7 @@ installed.
 
 Create a new virtual machine (if you are using an existing template, select the creation type `Deploy from template` and select a template):
 
-- In `Select compatibility` ensure that you choose `ESXi 5.5 and later` 
+- In `Select compatibility` ensure that you choose `ESXi 5.5 and later`
 - Select Windows as `Guest OS Family` and Microsoft Windows Server 2012 as `Guest OS version`
 - In `Customize hardware`
     - Select `Datastore ISO File` under `New CD\DVD Drive`
@@ -148,7 +148,7 @@ rake package:psmodules
 - On your windows VM, start `powershell` and run `Install-CFFeatures`
 - **Optional** If you would like to apply the recommended ingress and service configuration:
     - Run the following powershell command `Protect-CFCell`
-    
+
 **Note:** To make sure you have the proper .NET Framework version(s) installed, follow [this guide](manual-stemcell-dotnet-version-guide.md)
 
 ## Step 5: Build & Install BOSH Agent
@@ -176,7 +176,7 @@ In order to reduce the stemcell size, you can run the following powershell modul
   - Run the following powershell command `Invoke-Sysprep -IaaS vsphere -NewPassword <NEW_PASSWORD> -ProductKey <PRODUCT_KEY> -Owner <OWNER> -Organization <ORGANIZATION>`
   - This will power off the VM
   - Do not turn the VM back on before exporting
-  
+
 Or:
 
 **2)** If you would like to simply sysprep the image without applying the recommended security policies use the `-SkipLGPO` flag:
