@@ -161,14 +161,49 @@ If you need to build from source, then use the provided steps to do so.
 - Transfer `build/agent.zip` you built in the previous step, or the `agent.zip` downloaded from the releases page to your Windows VM.
 - On your Windows VM, start `powershell` and run `Install-Agent -IaaS vsphere -agentZipPath <PATH_TO_agent.zip>`
 
-## Step 6: Optimize and Compress Disk
+## Step 6: (Optional) Install OpenSSH
+
+Follow the below installation instructions, which are a condensed version of the instructions [here](https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH#install-win32-openssh-test-release).
+
+- Download the latest [build](https://github.com/PowerShell/Win32-OpenSSH/releases).
+- Extract contents to `C:\Program Files\OpenSSH`
+- Start Powershell as Administrator
+  - `cd 'C:\Program Files\OpenSSH'`
+- Install sshd and ssh-agent services.
+  - `.\install-sshd.ps1`
+- Setup SSH host keys
+  - `.\ssh-keygen.exe -A`
+- Open Firewall
+  - `New-NetFirewallRule -Protocol TCP -LocalPort 22 -Direction Inbound -Action Allow -DisplayName SSH`
+- Set sshd in auto-start mode
+  - `Set-Service sshd -StartupType Automatic`
+  - `Set-Service ssh-agent -StartupType Automatic`
+
+Manually setting up a user needs to happen on a BOSH deployed Windows VM and should not be run while provisioning.
+Full instructions are available [here](https://github.com/PowerShell/Win32-OpenSSH/wiki/ssh.exe-examples#login-with-ssh-keys).
+
+1. Copy id_rsa.pub (client's public key) to corresponding user's directory on ssh server machine as `%systemdrive%\users\<user>\.ssh\authorized_keys` (path on the ssh server machine)
+
+2. Make sure the authorized_keys file is secured (you make need to re-ACL it if it is not.) and "NT Service\sshd" has Read access to it.
+
+```
+$authorizedKeyPath = "%systemdrive%\users\<user>\.ssh\authorized_keys"
+$acl = get-acl $authorizedKeyPath
+$ar = New-Object  System.Security.AccessControl.FileSystemAccessRule("NT Service\sshd", "Read", "Allow")
+$acl.SetAccessRule($ar)
+Set-Acl  $authorizedKeyPath $acl
+```
+
+3. The `ssh` command may have been removed from the PATH - to add it back - add `C:\Program Files\OpenSSH` to either your PATH or the System PATH.
+
+## Step 7: Optimize and Compress Disk
 
 In order to reduce the stemcell size, you can run the following powershell modules to
 
 - `Optimize-Disk` Run `dism` and clear unnecessary files
 - `Compress-Disk` Defrag and zero out the disk
 
-## Step 7: Sysprep and optionally apply security policies
+## Step 8: Sysprep and optionally apply security policies
 
 **1)** If you would like to apply the recommended local security policy:
 
@@ -186,7 +221,7 @@ Or:
   - Do not turn the VM back on before exporting
 
 
-## Step 8: Export image to OVA format
+## Step 9: Export image to OVA format
 
 If you are using VMware Fusion or Workstation, after powering off the VM locate the directory that has your VM's `.vmx` file. This defaults to
 the `Documents\\Virtual Machines\\VM-name\\VM-name.vmx` path in your user's home directory.
@@ -198,7 +233,7 @@ Convert the vmx file into an OVA archive using `ovftool`:
 ovftool <PATH_TO_VMX_FILE> image.ova
 ```
 
-## Step 9: Convert OVA file to a BOSH Stemcell
+## Step 10: Convert OVA file to a BOSH Stemcell
 
 The format of the rake task is `rake package:vsphere_ova[<path_to_ova>,<path_to_stemcell_destination_directory>,stemcell_version]`
 
@@ -209,7 +244,7 @@ rake package:vsphere_ova[./build/image.ova,./build/stemcell,1035.0]
 
 NOTE: The OVA filename and destination path cannot currently have spaces in them (this will be fixed).
 
-## Step 10: Testing Stemcell with bosh-windows-acceptance-tests
+## Step 11: Testing Stemcell with bosh-windows-acceptance-tests
 
 Here are the [instructions for running bosh-windows-acceptance-tests(BWATS)](https://github.com/cloudfoundry-incubator/bosh-windows-stemcell-builder/tree/develop#testing-stemcell-with-bosh-windows-acceptance-tests)
 
