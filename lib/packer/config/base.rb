@@ -26,7 +26,7 @@ module Packer
 
       def self.post_provisioners(iaas)
         provisioners = [
-          Provisioners::CLEAR_PROVISIONER
+          # Provisioners::CLEAR_PROVISIONER
         ]
 
         if iaas.downcase != 'vsphere'

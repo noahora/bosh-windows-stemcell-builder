@@ -342,8 +342,8 @@ function Invoke-Sysprep() {
          $ec2settings.Save('C:\Program Files\Amazon\Ec2ConfigService\Settings\BundleConfig.xml')
       }
       "gcp" {
-         Create-Unattend-GCP
-         GCESysprep
+        Write-Log "Shutting down GCP vm"
+        Stop-Computer
       }
       "azure" {
          C:\Windows\System32\Sysprep\sysprep.exe /generalize /quiet /oobe /quit

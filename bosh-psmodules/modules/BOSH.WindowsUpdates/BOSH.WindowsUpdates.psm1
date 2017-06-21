@@ -63,11 +63,15 @@ function Install-WindowsUpdates {
 function Invoke-RebootOrComplete() {
     $RegistryKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
     $RegistryEntry = "InstallWindowsUpdates"
+
+    Write-Log "Current value of Run key is: $(Get-ItemProperty $RegistryKey)"
+    Write-Log "Current value of RunOnce key is: $(Get-ItemProperty ${RegistryKey}Once)"
+
     switch ($script:RestartRequired) {
         0 {
             $prop = (Get-ItemProperty $RegistryKey).$RegistryEntry
             if ($prop) {
-                Write-Log "Restart Registry Entry Exists - Removing It"
+                Write-Log "Restart Registry Entry Exists - Removing It: $prop"
                 Remove-ItemProperty -Path $RegistryKey -Name $RegistryEntry -ErrorAction SilentlyContinue
             }
 
