@@ -20,7 +20,8 @@ function Install-Agent {
     Protect-Dir -Path "C:\var"
     Write-AgentConfig -BoshDir "C:\bosh" -IaaS $IaaS
     Set-Path "C:\var\vcap\bosh\bin"
-    Install-AgentService
+    Install-AgentService -Iaas $IaaS
+
     Protect-Dir -Path "C:\Windows\Panther" -disableInheritance $False
     Write-Log "Install-Agent: Finished"
 }
@@ -253,7 +254,16 @@ function Set-Path {
 }
 
 function Install-AgentService {
+    Param(
+      [string]$Iaas=$(Throw "Iaas is missing")
+    )
+
     Write-Log "Install-AgentService: Installing BOSH Agent"
     Start-Process -FilePath "C:\bosh\service_wrapper.exe" -ArgumentList "install" -NoNewWindow -Wait
+
+    if ($IaaS -eq 'gcp') {
+      #set the service to be Automatic (delayed)
+      C:\windows\system32\sc.exe config bosh-agent start=delayed-auto
+    }
 }
 
