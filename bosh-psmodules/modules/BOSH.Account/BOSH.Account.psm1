@@ -21,6 +21,9 @@ function Add-Account {
     $AdminGroup = $adsi.Children | where {$_.SchemaClassName -eq 'group' -and $_.Name -eq $Group }
     $UserObject = $adsi.Children | where {$_.SchemaClassName -eq 'user' -and $_.Name -eq $User }
     $AdminGroup.Add($UserObject.Path)
+
+    Write-Log "Disable UAC"
+    New-ItemProperty -Path "HKLM:Software\Microsoft\Windows\CurrentVersion\policies\system" -Name EnableLUA -PropertyType DWord -Value 0 -Force
 }
 
 <#
@@ -38,4 +41,8 @@ function Remove-Account {
     $adsi = [ADSI]"WinNT://$env:COMPUTERNAME"
     $adsi.Delete('User', $User)
     Move-Item -Path "C:\Users\$User" -Destination "$env:windir\Temp\$User" -Force
+
+    Write-Log "Enable UAC"
+    New-ItemProperty -Path "HKLM:Software\Microsoft\Windows\CurrentVersion\policies\system" -Name EnableLUA -PropertyType DWord -Value 1 -Force
+
 }

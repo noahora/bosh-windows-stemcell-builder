@@ -10,11 +10,10 @@ $script:ScriptName = $MyInvocation.MyCommand.ToString()
 $script:ScriptPath = $MyInvocation.MyCommand.Path
 
 function Register-WindowsUpdatesTask {
-    $Prin = New-ScheduledTaskPrincipal -GroupId "BUILTIN\Administrators" -RunLevel Highest
-    $action = New-ScheduledTaskAction -Execute 'Powershell.exe' `
-    -Argument "-Command `"Install-WindowsUpdates`" "
-    $trigger =  New-ScheduledTaskTrigger -AtLogon -RandomDelay 00:00:30
-    Register-ScheduledTask -Principal $Prin -Action $action -Trigger $trigger -TaskName "InstallWindowsUpdates" -Description "InstallWindowsUpdates"
+    Write-Log "Register-WindowsUpdatesTask"
+    $RegistryKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+    $RegistryEntry = "InstallWindowsUpdates"
+    Set-ItemProperty -Path $RegistryKey -Name $RegistryEntry -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoLogo -ExecutionPolicy Bypass -Command Install-WindowsUpdates"
 }
 
 function Unregister-WindowsUpdatesTask {
