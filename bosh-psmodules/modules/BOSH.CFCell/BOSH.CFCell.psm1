@@ -107,7 +107,7 @@ function Protect-CFCell {
   Write-Log "Getting WinRM config"
   $winrm_config = & cmd.exe /c 'winrm get winrm/config'
   Write-Log "$winrm_config"
-  enable-rdp
+  disable-rdp
   Write-Log "Getting WinRM config"
   $winrm_config = & cmd.exe /c 'winrm get winrm/config'
   Write-Log "$winrm_config"
@@ -131,11 +131,22 @@ function WindowsFeatureInstall {
   }
 }
 
-function enable-rdp {
-  Write-Log "Starting to enable RDP"
-  Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
-  Get-NetFirewallRule -DisplayName "Remote Desktop*" | Set-NetFirewallRule -enabled true
-  Write-Log "Enabled RDP"
+function disable-rdp {
+  Write-Log "Starting to disable RDP"
+
+  $svc = Get-Service "TermService"
+  $svc.DependentServices | where { $_.Status -eq 'Running' -or $_.Status -eq 'StartPending' } | Stop-Service
+  if (($svc.Status -ne "Stopped" -or $svc.Status -ne "StopPending")) {
+    Write-Log "Stopping TermService"
+    $svc | Stop-Service
+  } else {
+    Write-Log "TermService not running, no need to stop"
+  }
+
+  Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 1
+  Get-NetFirewallRule -DisplayName "Remote Desktop*" | Set-NetFirewallRule -enabled false
+
+  Write-Log "Disabled RDP"
 }
 
 function disable-service {
