@@ -139,6 +139,7 @@ function disable-rdp {
   if (($svc.Status -ne "Stopped" -or $svc.Status -ne "StopPending")) {
     Write-Log "Stopping TermService"
     $svc | Stop-Service
+    $svc | Set-Service -StartType Disabled
   } else {
     Write-Log "TermService not running, no need to stop"
   }
