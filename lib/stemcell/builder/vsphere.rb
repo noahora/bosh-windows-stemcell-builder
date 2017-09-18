@@ -11,7 +11,6 @@ module Stemcell
                      administrator_password:,
                      mem_size:,
                      num_vcpus:,
-                     enable_rdp: false,
                      enable_kms: false,
                      kms_host: '',
                      **args)
@@ -19,7 +18,6 @@ module Stemcell
         @administrator_password = administrator_password
         @mem_size = mem_size
         @num_vcpus = num_vcpus
-        @enable_rdp = enable_rdp
         @enable_kms = enable_kms
         @kms_host = kms_host
         super(args)
@@ -79,7 +77,6 @@ module Stemcell
           os: @os,
           kms_host: @kms_host,
           enable_kms: @enable_kms,
-          enable_rdp: @enable_rdp,
           skip_windows_update: @skip_windows_update
         ).dump
       end

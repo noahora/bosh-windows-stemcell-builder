@@ -7,8 +7,7 @@
 function Enable-LocalSecurityPolicy {
     Param (
         [string]$LgpoExe ="C:\windows\lgpo.exe",
-        [string]$PolicyDestination = "C:\bosh\lgpo",
-        [switch]$EnableRDP
+        [string]$PolicyDestination = "C:\bosh\lgpo"
     )
 
     Write-Log "Starting LocalSecurityPolicy"
@@ -19,11 +18,6 @@ function Enable-LocalSecurityPolicy {
     $PolicyBaseLine = "$PolicyDestination\policy-baseline"
     if (-Not (Test-Path $PolicyBaseLine)) {
         Write-Error "ERROR: could not extract policy-baseline"
-    }
-
-    if($EnableRDP) {
-        $InfFilePath = Join-Path $PolicyBaseLine "DomainSysvol/GPO/Machine/microsoft/windows nt/SecEdit/GptTmpl.inf"
-        ModifyInfFile -InfFilePath $InfFilePath -KeyName "SeDenyNetworkLogonRight" -KeyValue "*S-1-5-32-546"
     }
 
     Invoke-Expression "$LgpoExe /g $PolicyDestination\policy-baseline /v 2>&1 > $PolicyDestination\LGPO.log"
@@ -287,8 +281,7 @@ function Invoke-Sysprep() {
         [string]$ProductKey="",
         [string]$Organization="",
         [string]$Owner="",
-        [switch]$SkipLGPO,
-        [switch]$EnableRDP
+        [switch]$SkipLGPO
     )
 
     Write-Log "Invoking Sysprep for IaaS: ${IaaS}"
@@ -330,7 +323,7 @@ function Invoke-Sysprep() {
                 if (-Not (Test-Path "C:\Windows\LGPO.exe")) {
                     Throw "Error: LGPO.exe is expected to be installed to C:\Windows\LGPO.exe"
                 }
-                Enable-LocalSecurityPolicy -EnableRDP:$EnableRDP
+                Enable-LocalSecurityPolicy
             }
 
             Create-Unattend -NewPassword $NewPassword -ProductKey $ProductKey `

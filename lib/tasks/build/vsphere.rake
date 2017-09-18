@@ -186,7 +186,6 @@ namespace :build do
       output_directory: output_directory,
       packer_vars: {},
       version: version,
-      enable_rdp: ENV.fetch('ENABLE_RDP', 'false').downcase == 'true',
       enable_kms: ENV.fetch('ENABLE_KMS', 'false').downcase == 'true',
       kms_host: ENV.fetch('KMS_HOST', ''),
       skip_windows_update: skip_windows_update

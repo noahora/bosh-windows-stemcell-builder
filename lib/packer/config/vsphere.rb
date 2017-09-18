@@ -69,7 +69,6 @@ module Packer
       def initialize(product_key:,
                      owner:,
                      organization:,
-                     enable_rdp:,
                      enable_kms:,
                      kms_host:,
                      new_password:,
@@ -77,7 +76,6 @@ module Packer
         @product_key = product_key
         @owner = owner
         @organization = organization
-        @enable_rdp = enable_rdp
         @enable_kms = enable_kms
         @kms_host = kms_host
         @new_password = new_password
@@ -85,14 +83,13 @@ module Packer
       end
 
       def builders
-        enable_rdp = @enable_rdp ? ' -EnableRdp' : ''
         product_key_flag = @product_key.to_s.empty? ? '' : " -ProductKey #{@product_key}"
         [
           'type' => 'vmware-vmx',
           'source_path' => @source_path,
           'headless' => false,
           'boot_wait' => '2m',
-          'shutdown_command' => "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -Command Invoke-Sysprep -IaaS vsphere -NewPassword #{@new_password}#{product_key_flag} -Owner #{@owner} -Organization #{@organization}#{enable_rdp}",
+          'shutdown_command' => "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -Command Invoke-Sysprep -IaaS vsphere -NewPassword #{@new_password}#{product_key_flag} -Owner #{@owner} -Organization #{@organization}",
           'shutdown_timeout' => '1h',
           'communicator' => 'winrm',
           'ssh_username' => 'Administrator',
