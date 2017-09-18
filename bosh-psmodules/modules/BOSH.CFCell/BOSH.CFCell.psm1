@@ -7,10 +7,6 @@
 function Install-CFFeatures {
   param ([switch]$ReduceMTU)
 
-  Write-Log "Getting WinRM config"
-  $winrm_config = & cmd.exe /c 'winrm get winrm/config'
-  Write-Log "$winrm_config"
-
   Write-Log "Installing CloudFoundry Cell Windows Features"
   $ErrorActionPreference = "Stop";
   trap { $host.SetShouldExit(1) }
@@ -104,19 +100,10 @@ function Install-ContainersFeature {
 }
 
 function Protect-CFCell {
-  Write-Log "Getting WinRM config"
-  $winrm_config = & cmd.exe /c 'winrm get winrm/config'
-  Write-Log "$winrm_config"
   disable-rdp
-  Write-Log "Getting WinRM config"
-  $winrm_config = & cmd.exe /c 'winrm get winrm/config'
-  Write-Log "$winrm_config"
   disable-service("WinRM")
   disable-service("W3Svc")
   set-firewall
-  Write-Log "Getting WinRM config"
-  $winrm_config = & cmd.exe /c 'winrm get winrm/config'
-  Write-Log "$winrm_config"
 }
 
 function WindowsFeatureInstall {
