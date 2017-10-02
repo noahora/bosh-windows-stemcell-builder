@@ -20,6 +20,7 @@ module Packer
           ]
         end
         pre << Provisioners::INSTALL_DOCKER_2016_REDUCE_MTU if iaas == 'gcp' && os == 'windows2016'
+        pre << Provisioners::REMOVE_WINDOWS_DEFENDER if iaas == 'vsphere' && os == 'windows2016'
         install_windows_updates = if skip_windows_update then [] else [Provisioners.install_windows_updates] end
         pre + install_windows_updates + [Provisioners::PROTECT_CF_CELL, Provisioners::INSTALL_SSHD]
       end

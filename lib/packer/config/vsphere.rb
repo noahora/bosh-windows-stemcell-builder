@@ -113,7 +113,7 @@ module Packer
 
       def provisioners
         pre = [
-          Base.pre_provisioners(@os, skip_windows_update: @skip_windows_update),
+          Base.pre_provisioners(@os, skip_windows_update: @skip_windows_update, iaas: 'vsphere'),
           Provisioners::lgpo_exe,
           Provisioners.install_agent('vsphere').freeze,
         ]
