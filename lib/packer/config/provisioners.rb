@@ -8,8 +8,20 @@ module Packer
         {
           'type' => 'powershell',
           'inline' => [
-            '$ErrorActionPreference = "Stop";',
-            'trap { $host.SetShouldExit(1) }',
+            '$ErrorActionPreference = "Stop"                             ',
+            'trap {                                                      ',
+            '    $formatstring = "{0} : {1}`n{2}`n" +                    ',
+            '                    "    + CategoryInfo          : {3}`n"   ',
+            '                    "    + FullyQualifiedErrorId : {4}`n"   ',
+            '    $fields = $_.InvocationInfo.MyCommand.Name,             ',
+            '              $_.ErrorDetails.Message,                      ',
+            '              $_.InvocationInfo.PositionMessage,            ',
+            '              $_.CategoryInfo.ToString(),                   ',
+            '              $_.FullyQualifiedErrorId                      ',
+            '                                                            ',
+            '    $formatstring -f $fields                                ',
+            '    Exit 1                                                  ',
+            '}                                                           ',
             command
           ]
         }

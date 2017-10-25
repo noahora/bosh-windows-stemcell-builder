@@ -1,4 +1,19 @@
 EMPTY_FILE_SHA = 'da39a3ee5e6b4b0d3255bfef95601890afd80709'
+TRAP_ERRORS = ["$ErrorActionPreference = \"Stop\"                             ",
+ "trap {                                                      ",
+ "    $formatstring = \"{0} : {1}`n{2}`n\" +                    ",
+ "                    \"    + CategoryInfo          : {3}`n\"   ",
+ "                    \"    + FullyQualifiedErrorId : {4}`n\"   ",
+ "    $fields = $_.InvocationInfo.MyCommand.Name,             ",
+ "              $_.ErrorDetails.Message,                      ",
+ "              $_.InvocationInfo.PositionMessage,            ",
+ "              $_.CategoryInfo.ToString(),                   ",
+ "              $_.FullyQualifiedErrorId                      ",
+ "                                                            ",
+ "    $formatstring -f $fields                                ",
+ "    Exit 1                                                  ",
+ "}                                                           "]
+
 require 'zip'
 
 # Mock web requests
