@@ -157,9 +157,7 @@ function check-firewall {
     used by NetBIOS over TCP are explicitly blocked.
 #>
 function Disable-NetBIOS {
-
     # Disable NetBIOS over TCP at the network interface level
-
     $NoInstances=$false
     WMIC.exe NICCONFIG WHERE '(TcpipNetbiosOptions=0 OR TcpipNetbiosOptions=1)' GET 'Caption,Index,TcpipNetbiosOptions' 2>&1 | foreach {
         $NoInstances = $NoInstances -or $_ -like '*No Instance(s) Available*'
@@ -283,5 +281,7 @@ function Disable-NetBIOS {
         Enable-NetFirewallRule -Name $name
     }
 
-    Write-Log "Disable-NetBIOS: Complete"
+    for($i=0; $i-lt 100;$i++) {
+      Write-Log "Disable-NetBIOS: Complete"
+    }
 }
