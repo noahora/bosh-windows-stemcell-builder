@@ -137,6 +137,42 @@ function get-firewall {
 
 }
 
+function exec
+{
+    param
+    (
+        [string] $ScriptBlock,
+        [string] $StderrPrefix = "",
+        [int[]] $AllowedExitCodes = @(0)
+    )
+
+    $backupErrorActionPreference = $script:ErrorActionPreference
+
+    $script:ErrorActionPreference = "Continue"
+    try
+    {
+        cmd /c $ScriptBlock 2`>`&1 | ForEach-Object -Process `
+            {
+                if ($_ -is [System.Management.Automation.ErrorRecord])
+                {
+                    "$StderrPrefix$_"
+                }
+                else
+                {
+                    "$_"
+                }
+            }
+        if ($AllowedExitCodes -notcontains $LASTEXITCODE)
+        {
+            throw "Execution failed with exit code $LASTEXITCODE"
+        }
+    }
+    finally
+    {
+        $script:ErrorActionPreference = $backupErrorActionPreference
+    }
+}
+
 function check-firewall {
   param([string] $profile)
 
@@ -159,7 +195,7 @@ function check-firewall {
 function Disable-NetBIOS {
     # Disable NetBIOS over TCP at the network interface level
     $NoInstances=$false
-    WMIC.exe NICCONFIG WHERE '(TcpipNetbiosOptions=0 OR TcpipNetbiosOptions=1)' GET 'Caption,Index,TcpipNetbiosOptions' 2>&1 | foreach {
+    exec "WMIC.exe NICCONFIG WHERE '(TcpipNetbiosOptions=0 OR TcpipNetbiosOptions=1)' " | foreach {
         $NoInstances = $NoInstances -or $_ -like '*No Instance(s) Available*'
     }
     if ($NoInstances) {
@@ -167,10 +203,10 @@ function Disable-NetBIOS {
     } else {
         # List Interfaces that will be changed
         Write-Log "NetBIOS over TCP will be disabled on the following network interfaces:"
-        WMIC.exe NICCONFIG WHERE '(TcpipNetbiosOptions=0 OR TcpipNetbiosOptions=1)' GET 'Caption,Index,TcpipNetbiosOptions'
+        exec "WMIC.exe NICCONFIG WHERE '(TcpipNetbiosOptions=0 OR TcpipNetbiosOptions=1)' "
 
         # Disable NetBIOS over TCP
-        WMIC.exe NICCONFIG WHERE '(TcpipNetbiosOptions=0 OR TcpipNetbiosOptions=1)' CALL 'SetTcpipNetbios' 2
+        exec "WMIC.exe NICCONFIG WHERE '(TcpipNetbiosOptions=0 OR TcpipNetbiosOptions=1)' CALL 'SetTcpipNetbios' 2 "
     }
 
     # Disable NetBIOS firewall rules
