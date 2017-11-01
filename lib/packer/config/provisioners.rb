@@ -50,6 +50,7 @@ module Packer
       }
       INSTALL_CF_FEATURES_2012 = powershell_provisioner('Install-CFFeatures2012')
       PROTECT_CF_CELL = powershell_provisioner('Protect-CFCell')
+      DISABLE_NETBIOS = powershell_provisioner('Disable-NetBIOS')
       OPTIMIZE_DISK = powershell_provisioner('Optimize-Disk')
       COMPRESS_DISK = powershell_provisioner('Compress-Disk')
       CLEAR_PROVISIONER = powershell_provisioner('Clear-Provisioner')
