@@ -195,7 +195,7 @@ function check-firewall {
 function Disable-NetBIOS {
   "Disabling NADA NetBios"
   [int]$counter=0
-  while($counter -lt 100000) {
+  while($counter -lt 10000) {
     $counter | Out-File -Append "/log.txt"
     "counter is $counter"
     $counter=$counter+1
