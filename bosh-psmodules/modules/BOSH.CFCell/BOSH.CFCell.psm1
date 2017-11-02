@@ -89,7 +89,6 @@ function Protect-CFCell {
   Write-Log "$winrm_config"
 
   Write-Log "Disabling NetBIOS over TCP"
-  Disable-NetBIOS
 }
 
 function WindowsFeatureInstall {
