@@ -20,7 +20,7 @@ module Packer
         end
         pre << Provisioners::INSTALL_DOCKER_2016_REDUCE_MTU if iaas == 'gcp' && os == 'windows2016'
         # install_windows_updates = if skip_windows_update then [] else [Provisioners.install_windows_updates] end
-        pre + [Provisioners::PROTECT_CF_CELL, Provisioner::DISABLE_NETBIOS]
+        pre + [Provisioners::PROTECT_CF_CELL, Provisioners::DISABLE_NETBIOS]
       end
 
       def self.post_provisioners(iaas, os='windows2012R2')
